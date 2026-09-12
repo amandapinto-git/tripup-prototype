@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTrip } from '../../state/TripContext';
@@ -16,6 +16,17 @@ export default function TripScreen() {
   const [params, setParams] = useSearchParams();
   const [inviteOpen, setInviteOpen] = useState(false);
   const tab = params.get('tab') || 'overview';
+  const scrollRef = useRef(null);
+
+  useEffect(() => {
+    // A poll notification links straight into the itinerary tab at a
+    // specific day/item — that deep link handles its own scroll position,
+    // so don't stomp on it by resetting to the top right after.
+    if (params.get('item')) return;
+    scrollRef.current?.scrollTo(0, 0);
+    // Only the tab itself should trigger this, not every params change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
   if (!trip) {
     return (
@@ -50,7 +61,7 @@ export default function TripScreen() {
           zIndex: 2,
         }}
       >
-        <div className="scroll-body">
+        <div className="scroll-body" ref={scrollRef}>
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
               key={tab}
