@@ -33,6 +33,7 @@ export default function AddExpenseFlow() {
     itineraryItemId: null,
     splitType: 'equal',
     splitWith: trip ? trip.members.map((m) => m.id) : [],
+    customSplit: {},
   });
 
   const itineraryItems = useMemo(
@@ -65,6 +66,10 @@ export default function AddExpenseFlow() {
         paidBy: YOU_ID,
         splitType: draft.splitType,
         splitWith: draft.splitWith,
+        customSplit:
+          draft.splitType === 'custom'
+            ? Object.fromEntries(draft.splitWith.map((id) => [id, Number(draft.customSplit[id]) || 0]))
+            : undefined,
         date: new Date().toISOString(),
         itineraryItemId: draft.itineraryItemId,
       },
@@ -275,7 +280,9 @@ function DetailsStep({ draft, setDraft, onNext }) {
 }
 
 function SplitStep({ trip, draft, setDraft, onConfirm }) {
+  const isCustom = draft.splitType === 'custom';
   const perPerson = draft.splitWith.length ? Number(draft.amount) / draft.splitWith.length : 0;
+  const assigned = draft.splitWith.reduce((sum, id) => sum + (Number(draft.customSplit[id]) || 0), 0);
 
   const toggleMember = (id) => {
     setDraft((d) => ({
@@ -284,17 +291,27 @@ function SplitStep({ trip, draft, setDraft, onConfirm }) {
     }));
   };
 
+  const setCustomAmount = (id, value) => {
+    setDraft((d) => ({ ...d, customSplit: { ...d.customSplit, [id]: value } }));
+  };
+
+  const canConfirm =
+    draft.splitWith.length > 0 && (!isCustom || draft.splitWith.every((id) => Number(draft.customSplit[id]) > 0));
+
   return (
     <>
       <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
-        <PillToggle
-          value={draft.splitType}
-          onChange={(splitType) => setDraft((d) => ({ ...d, splitType }))}
-          options={[
-            { value: 'equal', label: 'Equally' },
-            { value: 'custom', label: 'Custom' },
-          ]}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <FieldLabel>Split Options</FieldLabel>
+          <PillToggle
+            value={draft.splitType}
+            onChange={(splitType) => setDraft((d) => ({ ...d, splitType }))}
+            options={[
+              { value: 'equal', label: 'Equally' },
+              { value: 'custom', label: 'Custom' },
+            ]}
+          />
+        </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {trip.members.map((m) => {
@@ -306,9 +323,32 @@ function SplitStep({ trip, draft, setDraft, onConfirm }) {
                   <span style={{ fontSize: 14, fontWeight: 600 }}>{m.id === 'you' ? 'You' : m.name}</span>
                 </div>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>
-                    {included ? `$${perPerson.toFixed(0)}` : '—'}
-                  </span>
+                  {included && isCustom ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>$</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={draft.customSplit[m.id] ?? ''}
+                        onChange={(e) => setCustomAmount(m.id, e.target.value)}
+                        style={{
+                          width: 56,
+                          border: 'none',
+                          outline: 'none',
+                          background: 'transparent',
+                          fontSize: 14,
+                          fontWeight: 600,
+                          color: 'var(--ink)',
+                          textAlign: 'right',
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: 14, fontWeight: 600 }}>
+                      {included ? `$${perPerson.toFixed(0)}` : '—'}
+                    </span>
+                  )}
                   <button
                     onClick={() => toggleMember(m.id)}
                     style={{
@@ -320,6 +360,7 @@ function SplitStep({ trip, draft, setDraft, onConfirm }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      flexShrink: 0,
                     }}
                   >
                     {included && <Check size={13} weight="bold" color="#fff" />}
@@ -329,9 +370,15 @@ function SplitStep({ trip, draft, setDraft, onConfirm }) {
             );
           })}
         </div>
+
+        {isCustom && (
+          <p style={{ margin: 0, fontSize: 13, color: assigned === Number(draft.amount) ? 'var(--ink-mute)' : 'var(--danger)' }}>
+            Assigned ${assigned.toFixed(0)} of ${(Number(draft.amount) || 0).toFixed(0)}
+          </p>
+        )}
       </div>
       <div className="bottom-bar">
-        <button className="btn btn-primary" disabled={draft.splitWith.length === 0} onClick={onConfirm}>
+        <button className="btn btn-primary" disabled={!canConfirm} onClick={onConfirm}>
           Confirm & Add
         </button>
       </div>
