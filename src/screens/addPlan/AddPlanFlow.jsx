@@ -154,7 +154,7 @@ export default function AddPlanFlow() {
 function DecideStep({ onKnown, onVote }) {
   return (
     <div className="screen-pad" style={{ paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <p style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600 }}>Is the plan already decided?</p>
+      <p style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 600 }}>Is the plan already decided?</p>
       <button className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: 24 }} onClick={onKnown}>
         <Plus size={24} />
         <span style={{ fontWeight: 600, fontSize: 14 }}>I know what we're doing</span>
