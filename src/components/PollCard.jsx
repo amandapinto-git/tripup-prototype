@@ -54,11 +54,17 @@ function OptionField({ opt, pct, filled, onClick, right }) {
   );
 }
 
+// The scheduled time only gets its own line once it's a real time — not
+// one of the placeholder strings AddPlanFlow writes when the time itself
+// is still up for a vote or was never set.
+const PLACEHOLDER_TIMES = ['Time TBD', 'Time: vote in progress'];
+
 export default function PollCard({ tripId, poll, members, onOpenMaps }) {
   const dispatch = useTripDispatch();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes.length, 0);
   const closed = isPollClosed(poll, members);
+  const showScheduledTime = poll.time && !PLACEHOLDER_TIMES.includes(poll.time);
 
   const vote = (optionId) => {
     dispatch({ type: 'VOTE_POLL', tripId, pollId: poll.id, memberId: YOU_ID, optionId });
@@ -115,6 +121,7 @@ export default function PollCard({ tripId, poll, members, onOpenMaps }) {
             width: '100%',
           }}
         >
+          {showScheduledTime && <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
           <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -167,8 +174,11 @@ export default function PollCard({ tripId, poll, members, onOpenMaps }) {
         width: '100%',
       }}
     >
-      <div className="row-between">
-        <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
+      <div className="row-between" style={{ alignItems: 'flex-start' }}>
+        <div>
+          {showScheduledTime && <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
+          <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
