@@ -31,12 +31,22 @@ function resetDemoPoll(trips) {
   }));
 }
 
+// Expenses (and settlements) added during a demo session shouldn't pile up
+// forever in localStorage — each trip's expense list resets to its seed
+// state on every load, same as the demo poll.
+function resetExpenses(trips) {
+  return trips.map((trip) => {
+    const seedTrip = seedTrips.find((t) => t.id === trip.id);
+    return seedTrip ? { ...trip, expenses: seedTrip.expenses } : trip;
+  });
+}
+
 function loadInitial() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...parsed, trips: resetDemoPoll(parsed.trips) };
+      return { ...parsed, trips: resetExpenses(resetDemoPoll(parsed.trips)) };
     }
   } catch {
     // ignore corrupted storage
