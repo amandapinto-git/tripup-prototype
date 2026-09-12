@@ -1,16 +1,24 @@
 import { useState } from 'react';
 import { X, Link as LinkIcon, Check } from '@phosphor-icons/react';
 import Avatar from './Avatar';
-import { AVATAR_COLORS, YOU_ID } from '../data/seed';
-import { useTripDispatch } from '../state/TripContext';
-
-const SUGGESTIONS = ['Priya', 'Sam', 'Leo', 'Frankie'];
+import { AVATAR_COLORS, YOU_ID, allMembers } from '../data/seed';
+import { useTripDispatch, useTripState } from '../state/TripContext';
 
 export default function InviteModal({ trip, onClose }) {
   const dispatch = useTripDispatch();
+  const { trips } = useTripState();
   const [name, setName] = useState('');
   const [copied, setCopied] = useState(false);
   const [added, setAdded] = useState([]);
+
+  // Anyone already sharing a different trip with you is a real, known
+  // person to suggest here — no need to invite them from scratch.
+  const otherTripIds = new Set(
+    trips.filter((t) => t.id !== trip.id && t.members.some((m) => m.id === YOU_ID)).flatMap((t) => t.members.map((m) => m.id))
+  );
+  const friendsFromOtherTrips = allMembers.filter(
+    (m) => m.id !== YOU_ID && otherTripIds.has(m.id) && !trip.members.some((tm) => tm.id === m.id) && !added.includes(m.id)
+  );
 
   const addFriend = (friendName) => {
     const id = friendName.toLowerCase().replace(/\s+/g, '-');
@@ -22,6 +30,11 @@ export default function InviteModal({ trip, onClose }) {
     });
     setAdded((prev) => [...prev, id]);
     setName('');
+  };
+
+  const addExistingFriend = (member) => {
+    dispatch({ type: 'ADD_MEMBER', tripId: trip.id, member });
+    setAdded((prev) => [...prev, member.id]);
   };
 
   const removeFriend = (memberId) => {
@@ -64,38 +77,6 @@ export default function InviteModal({ trip, onClose }) {
             </div>
             {copied ? <span className="toast">Copied!</span> : <span style={{ fontSize: 14, color: 'var(--ink-mute)' }}>Copy</span>}
           </button>
-
-          <div className="field">
-            <label>Or add by name</label>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Priya"
-                onKeyDown={(e) => e.key === 'Enter' && name.trim() && addFriend(name.trim())}
-              />
-              <button className="btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <p className="section-title">Suggested</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {SUGGESTIONS.filter((s) => !added.includes(s.toLowerCase())).map((s) => (
-                <div key={s} className="list-row">
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                    <Avatar member={{ initial: s[0], color: '#c7ccd1' }} size={32} />
-                    <span style={{ fontSize: 14, fontWeight: 600 }}>{s}</span>
-                  </div>
-                  <button className="btn-outline btn-sm" onClick={() => addFriend(s)}>
-                    Invite
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {organiser && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -144,6 +125,40 @@ export default function InviteModal({ trip, onClose }) {
               ))}
             </div>
           </div>
+
+          <div className="field">
+            <label>Or add by name</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Priya"
+                onKeyDown={(e) => e.key === 'Enter' && name.trim() && addFriend(name.trim())}
+              />
+              <button className="btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
+                Add
+              </button>
+            </div>
+          </div>
+
+          {friendsFromOtherTrips.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p className="section-title">From your other trips</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {friendsFromOtherTrips.map((m) => (
+                  <div key={m.id} className="list-row">
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <Avatar member={m} size={32} />
+                      <span style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</span>
+                    </div>
+                    <button className="btn-outline btn-sm" onClick={() => addExistingFriend(m)}>
+                      Invite
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
