@@ -247,15 +247,18 @@ function DetailsStep({ draft, setDraft, onNext }) {
           />
         </UnderlineField>
         <UnderlineField label="Amount">
-          <input
-            type="number"
-            inputMode="decimal"
-            placeholder="0"
-            value={draft.amount}
-            onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))}
-            className="poll-underline-input"
-            style={underlineInputStyle()}
-          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 22, fontWeight: 400, color: 'var(--ink-mute)' }}>$</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              placeholder="0"
+              value={draft.amount}
+              onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))}
+              className="poll-underline-input"
+              style={underlineInputStyle()}
+            />
+          </div>
         </UnderlineField>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <FieldLabel>Category</FieldLabel>
