@@ -1,0 +1,763 @@
+:root {
+  --font: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --ink: #1a1a1a;
+  --ink-soft: #444444;
+  --ink-mute: #8a8f94;
+  --ink-faint: #b7bcc1;
+
+  --surface: #ffffff;
+  --surface-app: #f4f5f6;
+  --surface-muted: #f4f8fc;
+  --surface-card: #eef1f4;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --border-soft: rgba(217, 217, 217, 0.5);
+
+  --accent: #16202a;
+  --accent-soft: #6e889a;
+  --danger: #c66f6f;
+  --success: #5aa63f;
+
+  --radius-xl: 24px;
+  --radius-lg: 16px;
+  --radius-card: 12px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 1px 2px rgba(16, 20, 24, 0.04);
+  --shadow-pop: 0 12px 32px rgba(16, 20, 24, 0.16);
+
+  color-scheme: light;
+
+  /* ---------- type scale ----------
+     Every text size in the app should be one of these. 14px is the floor
+     everywhere — below that is hard to read on a phone, so the lighter
+     tiers (label/small/micro) differentiate by weight and color, not size.
+     Roles:
+     display   hero numbers (Total Spend $)
+     h1        expanded screen title (trip name on photo)
+     h2        page-level section header (Home's "Your Trips" etc.)
+     h3        sub-page heading ("In progress", a day label, a flow step title)
+     title     card/list item title, collapsed nav title
+     body      default row text — names, amounts, buttons, inputs
+     label     small section label ("Trip Essentials", "You owe")
+     small     secondary/meta text (timestamps, helper copy)
+     micro     smallest chip/badge text
+  */
+  --fs-display: 48px;
+  --fs-h1: 28px;
+  --fs-h2: 24px;
+  --fs-h3: 20px;
+  --fs-title: 18px;
+  --fs-body: 14px;
+  --fs-label: 14px;
+  --fs-small: 14px;
+  --fs-micro: 14px;
+
+  --fw-bold: 600;
+  --fw-semibold: 600;
+  --fw-medium: 600;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font);
+  background: #fff;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- App shell: centers a phone-width frame on desktop ---------- */
+
+/* Below 640px we assume a real phone browser: the app fills the viewport
+   edge-to-edge, no mockup chrome. At 640px+ (desktop/tablet) we render the
+   phone-frame mockup centered on the page, since there's no real device
+   bezel to rely on for context. */
+
+.app-shell {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone {
+  position: relative;
+  width: 100%;
+  /* A bounded height (not min-height) is required — otherwise .phone grows
+     to fit its content instead of capping at the viewport, the whole page
+     scrolls instead of the inner scroll containers, and position:sticky
+     inside them stops doing anything. */
+  height: 100vh;
+  height: 100dvh;
+  background: var(--surface);
+  /* `clip`, not `hidden` — this frame must never scroll. `hidden` still
+     makes it a scroll container, so a focused input's default
+     scroll-into-view (or any programmatic focus) can quietly set its
+     scrollTop and shift the entire mockup off-screen; `clip` clips
+     identically but isn't scrollable at all. */
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+}
+
+/* .phone-canvas is a fixed-size design surface (the real iPhone 14 point
+   size, 390x844 — same numbers Figma uses) that every screen is authored
+   against, so mobile text/spacing always matches Figma exactly. On mobile
+   it's just a plain full-height pass-through. On the desktop mockup, where
+   .phone itself may render smaller than 390x844 to fit the viewport, we
+   scale the whole canvas down by the same ratio instead of letting fonts
+   render at native px size inside a shrunk frame. */
+.phone-canvas {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    padding: 32px 16px;
+    background: #e7e9eb;
+  }
+
+  .phone {
+    /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport */
+    aspect-ratio: 390 / 844;
+    height: min(844px, calc(100vh - 64px));
+    width: auto;
+    max-width: 100%;
+    border-radius: 55px;
+    border: 8px solid #0b0b0c;
+    box-shadow: var(--shadow-pop);
+  }
+
+  .phone-canvas {
+    width: 390px;
+    height: 844px;
+    flex: none;
+    /* --phone-scale is set from JS (measuring .phone's actual rendered box)
+       because the box can be clamped by EITHER height (min(844px, 100vh-64))
+       OR width (max-width:100%) depending on the viewport's aspect ratio —
+       a pure-CSS formula for one axis silently breaks on the other, which
+       is exactly what caused content to overflow the right edge. */
+    transform: scale(var(--phone-scale, 1));
+    transform-origin: top left;
+  }
+}
+
+.phone-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Non-scrolling flex column that fills the phone — used when a screen needs
+   a fixed header and an independently scrollable body beneath it.
+   `overflow: clip` (not `hidden`) is deliberate: `hidden` still makes the
+   element a scroll container, so a focused input's default
+   scroll-into-view can silently set its scrollTop and shift the whole
+   static frame. `clip` clips the same way without ever being scrollable. */
+.phone-fixed {
+  flex: 1;
+  min-height: 0;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Soft radiating pulse behind the "happening now" itinerary icon — signals
+   live/current the way a map's live-location dot does. */
+@keyframes timeline-pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(4.5);
+    opacity: 0;
+  }
+}
+.timeline-pulse {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  animation: timeline-pulse 1.6s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+
+.timeline-pulse--white {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.btn-scale {
+  transition: transform 0.1s ease;
+}
+.btn-scale:active {
+  transform: scale(0.95);
+}
+
+.suggested-card {
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+.suggested-card:active {
+  background-color: rgba(0, 0, 0, 0.04);
+  transform: scale(0.96);
+}
+
+/* Static, never-scrolling wrapper around the scroll body. `clip` (not
+   `hidden`) — see the .phone-fixed note above: `hidden` still makes an
+   element a scroll container, so a focused input's default
+   scroll-into-view can quietly set its scrollTop and shift things. */
+.scroll-body-outer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+}
+
+.scroll-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.status-bar.on-photo {
+  color: #fff;
+}
+
+/* Real mobile browser: no device bezel to fake, and the OS already shows
+   its own clock/battery — our mocked status bar would just duplicate (and
+   contradict) it, so hide it below the desktop-mockup breakpoint. */
+@media (max-width: 639px) {
+  .status-bar {
+    display: none;
+  }
+}
+
+/* ---------- shared bits ---------- */
+
+.screen-pad {
+  padding: 20px 24px 0;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
+/* ---------- type scale utilities (see :root for the roles) ---------- */
+
+.text-display {
+  font-size: var(--fs-display);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.text-h1 {
+  font-size: var(--fs-h1);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.text-h2 {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.text-h3 {
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.text-title {
+  font-size: var(--fs-title);
+  font-weight: var(--fw-bold);
+  margin: 0;
+}
+
+.text-body {
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  margin: 0;
+}
+
+.text-label {
+  font-size: var(--fs-label);
+  font-weight: var(--fw-semibold);
+  margin: 0;
+}
+
+.text-small {
+  font-size: var(--fs-small);
+  font-weight: var(--fw-medium);
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+.text-micro {
+  font-size: var(--fs-micro);
+  font-weight: var(--fw-medium);
+  color: var(--ink-mute);
+  margin: 0;
+}
+
+.pill-nav {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+}
+
+.pill-nav.on-photo {
+  background: rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  border: 0.5px solid rgba(255, 255, 255, 0.13);
+}
+
+.pill-nav button {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-mute);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.pill-nav button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill-nav button svg {
+  flex-shrink: 0;
+}
+
+.pill-nav.on-photo button {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.pill-nav button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.pill-nav.on-photo button.active {
+  background: rgba(255, 255, 255, 0.12);
+  border: 0.5px solid rgba(255, 255, 255, 0.11);
+  color: #fff;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  width: 100%;
+}
+
+.btn-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  background: var(--surface-card);
+  color: var(--ink-soft);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.btn-dark-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f1f1;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+
+.icon-btn.on-photo {
+  background: rgba(0, 0, 0, 0.18);
+  color: #fff;
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.card-muted {
+  background: var(--surface-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  flex-shrink: 0;
+  border: 0.7px solid rgba(255, 255, 255, 0.25);
+}
+
+/* Must match the photo header's collapsed title row (TripHeroHeader.jsx)
+   exactly — same padding on all sides, same icon-btn size — so the trip
+   title sits at the identical spot when navigating from the Itinerary/
+   Expenses tab into a sub-flow like Add Event or Add Expense. Color and
+   weight can differ; position can't, or the title visibly jumps on the
+   transition. */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px 0;
+  padding-top: max(8px, env(safe-area-inset-top, 0px));
+  flex-shrink: 0;
+}
+
+.top-bar h1 {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Floating action button — pinned to the phone frame (not the scroll
+   container), 24px from the right and 16px from the bottom, always
+   visible above scrolled content. */
+.fab-btn {
+  position: fixed;
+  right: 24px;
+  bottom: max(16px, calc(env(safe-area-inset-bottom, 0px) + 8px));
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 22px;
+  border-radius: var(--radius-pill);
+  background: #000;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* The one bottom action-bar style used everywhere in the app — same
+   padding, background, border, and button treatment on every screen so
+   nothing looks like a one-off. */
+.bottom-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 6;
+  display: flex;
+  gap: 12px;
+  padding: 12px 24px;
+  padding-bottom: max(10px, calc(env(safe-area-inset-bottom, 0px) + 4px));
+  background: #fff;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.bottom-bar .btn-primary {
+  background: #000;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+
+.list-row + .list-row {
+  margin-top: 8px;
+}
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-mute);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-bottom-color: var(--accent);
+}
+
+/* Every rounded-rectangle input in a list (poll options, time pickers,
+   etc.) shares this exact box so nothing looks mismatched in height,
+   radius, or padding — regardless of the underlying input type. */
+.input-box {
+  box-sizing: border-box;
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+.input-box:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.input-box::placeholder {
+  color: var(--ink-mute);
+  font-weight: 500;
+}
+
+.poll-underline-input::placeholder {
+  color: rgba(0, 0, 0, 0.28);
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success);
+  background: rgba(90, 166, 63, 0.12);
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 14, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 50;
+  animation: fade-in 0.15s ease;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 402px;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 32px;
+  animation: slide-up 0.2s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.fade-route {
+  animation: fade-in 0.18s ease;
+}
+
+/* ---------- ticket-stub divider (flight card perforation) ---------- */
+
+.ticket-divider {
+  position: relative;
+  width: calc(100% + 40px);
+  margin-left: -20px;
+  height: 1px;
+  border-top: 1.5px dashed rgba(255, 255, 255, 0.35);
+}
+
+.ticket-divider::before,
+.ticket-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateY(-50%);
+}
+
+.ticket-divider::before {
+  left: -8px;
+}
+
+.ticket-divider::after {
+  right: -8px;
+}

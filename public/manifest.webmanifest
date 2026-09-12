@@ -1,0 +1,19 @@
+{
+  "name": "TripUp",
+  "short_name": "TripUp",
+  "description": "Plan trips, vote on decisions, and split costs with friends.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
