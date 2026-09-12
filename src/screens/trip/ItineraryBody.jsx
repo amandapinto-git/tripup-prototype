@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Bed, ForkKnife, Ticket, AirplaneTakeoff, Plus, Car, PersonSimpleWalk, NavigationArrow } from '@phosphor-icons/react';
 import PollCard from '../../components/PollCard';
 import MapsDrawer from '../../components/MapsDrawer';
+import { estimateTransit } from '../../utils/transit';
 
 const ICONS = {
   hotel: Bed,
@@ -10,13 +11,6 @@ const ICONS = {
   flight: AirplaneTakeoff,
   activity: Ticket,
 };
-
-// Mock travel legs between consecutive stops — alternates walking/driving
-// so the timeline reads as a real route rather than a repeated placeholder.
-const TRANSIT_MODES = [
-  { icon: PersonSimpleWalk, duration: '8m', distance: '0.4mi' },
-  { icon: Car, duration: '14m', distance: '3.1mi' },
-];
 
 // A flight has no `location`/`title` place name of its own — it's the
 // airport at whichever end of the leg is relevant to the direction being
@@ -151,7 +145,8 @@ export default function ItineraryBody({ trip }) {
 
               const nextItem = day.items[i + 1];
               const showTransit = !isLast && item.type !== 'poll';
-              const transit = TRANSIT_MODES[i % TRANSIT_MODES.length];
+              const origin = showTransit ? locationLabel(item, 'origin') : null;
+              const destination = showTransit ? locationLabel(nextItem, 'destination') : null;
 
               if (item.type === 'poll') {
                 return (
@@ -182,14 +177,11 @@ export default function ItineraryBody({ trip }) {
                   </TimelineRow>
                   {showTransit && (
                     <TransitRow
+                      key={`${origin}|${destination}`}
                       lineStyle={transitLineStyle}
-                      mode={transit}
-                      onNavigate={() =>
-                        setMapsPlace({
-                          origin: locationLabel(item, 'origin'),
-                          destination: locationLabel(nextItem, 'destination'),
-                        })
-                      }
+                      origin={origin}
+                      destination={destination}
+                      onNavigate={() => setMapsPlace({ origin, destination })}
                     />
                   )}
                 </div>
@@ -241,9 +233,24 @@ function TimelineRow({ icon: Icon, isLast, current, muted, lineStyle, children }
 }
 
 // Travel leg between two stops — sits inline in the timeline so the
-// connecting line reads as a continuous route, not a broken one.
-function TransitRow({ lineStyle, mode, onNavigate }) {
-  const Icon = mode.icon;
+// connecting line reads as a continuous route, not a broken one. Mode and
+// time come from a real estimate (geocoded distance, walking vs an actual
+// driving route) rather than a mock, so they track the real places involved.
+function TransitRow({ lineStyle, origin, destination, onNavigate }) {
+  const [info, setInfo] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!origin || !destination) return undefined;
+    estimateTransit(origin, destination).then((result) => {
+      if (!cancelled) setInfo(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [origin, destination]);
+
+  const Icon = info?.mode === 'car' ? Car : PersonSimpleWalk;
   return (
     <div style={{ display: 'flex', gap: 16, alignItems: 'stretch' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: 28, flexShrink: 0 }}>
@@ -270,9 +277,15 @@ function TransitRow({ lineStyle, mode, onNavigate }) {
           }}
         >
           <Icon size={14} weight="fill" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#000' }}>{mode.duration}</span>
-          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)' }}>•</span>
-          <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.55)' }}>{mode.distance}</span>
+          {info ? (
+            <>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#000' }}>{info.duration}</span>
+              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)' }}>•</span>
+              <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.55)' }}>{info.distance}</span>
+            </>
+          ) : (
+            <span style={{ fontSize: 13, color: 'rgba(0,0,0,0.35)' }}>···</span>
+          )}
         </span>
         <button
           onClick={onNavigate}
