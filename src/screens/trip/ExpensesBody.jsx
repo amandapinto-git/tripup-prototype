@@ -77,7 +77,7 @@ export default function ExpensesBody({ trip }) {
               </button>
               <button
                 className="icon-btn"
-                style={{ background: 'transparent', width: 40, color: scope === 'me' ? 'var(--ink)' : 'var(--ink-mute)' }}
+                style={{ background: scope === 'me' ? '#000' : 'transparent', color: scope === 'me' ? '#fff' : 'var(--ink-mute)' }}
                 onClick={() => setScope('me')}
                 title="Just me"
               >
