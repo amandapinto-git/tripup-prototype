@@ -4,14 +4,12 @@ export default function AddPlanDecideDrawer({ onClose, onChoose }) {
   return (
     <div className="sheet-overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="row-between" style={{ marginBottom: 10 }}>
-          <p className="section-title">Add an event</p>
+        <div className="row-between" style={{ alignItems: 'flex-start', marginBottom: 16, gap: 12 }}>
+          <p style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>Is the plan already decided?</p>
           <button className="icon-btn" style={{ flexShrink: 0 }} onClick={onClose}>
             <X size={16} weight="bold" />
           </button>
         </div>
-
-        <p style={{ margin: '0 0 16px', fontSize: 24, fontWeight: 600 }}>Is the plan already decided?</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <button
