@@ -46,7 +46,10 @@ export default function AddPlanFlow() {
   const [date, setDate] = useState(params.get('date') || trip?.start || '');
   const label = formatDayLabel(date);
 
-  const [mode, setMode] = useState(null); // 'known' | 'vote'
+  // Usually arrives already decided — AddPlanDecideDrawer asks "known vs
+  // vote" up front and passes the answer via ?mode=. Falling back to the
+  // in-flow DecideStep below only matters for a direct/bookmarked URL.
+  const [mode, setMode] = useState(params.get('mode') === 'vote' ? 'vote' : params.get('mode') === 'known' ? 'known' : null);
   const [item, setItem] = useState({ title: '', location: '', time: '', category: 'activities' });
   const [poll, setPoll] = useState({
     question: '',
@@ -183,14 +186,14 @@ function KnownForm({ item, setItem, onSubmit, date, setDate, trip }) {
           />
         </UnderlineField>
         <LocationField value={item.location} onChange={(v) => setItem((d) => ({ ...d, location: v }))} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <FieldLabel>Category</FieldLabel>
+          <CategoryPicker selected={item.category} onChange={(key) => setItem((d) => ({ ...d, category: key }))} />
+        </div>
         <DateField value={date} onChange={setDate} min={trip.start} max={trip.end} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <FieldLabel>Time</FieldLabel>
           <TimePickerField value={item.time} onChange={(v) => setItem((d) => ({ ...d, time: v }))} />
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <FieldLabel>Category</FieldLabel>
-          <CategoryPicker selected={item.category} onChange={(key) => setItem((d) => ({ ...d, category: key }))} />
         </div>
       </div>
       <div className="bottom-bar">
@@ -235,12 +238,12 @@ function PollForm({ poll, setPoll, onSubmit, date, setDate, trip }) {
           />
         </UnderlineField>
 
-        <DateField value={date} onChange={setDate} min={trip.start} max={trip.end} />
-
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <FieldLabel>Category</FieldLabel>
           <CategoryPicker selected={poll.category} onChange={(key) => setPoll((d) => ({ ...d, category: key }))} />
         </div>
+
+        <DateField value={date} onChange={setDate} min={trip.start} max={trip.end} />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <FieldLabel>Options</FieldLabel>

@@ -591,6 +591,11 @@ img {
   background: #fff;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+  /* When the form above is shorter than the screen, sticky has no scroll
+     distance to work with and the bar just sits under the last field —
+     this pushes it to the bottom of the flex column in that case, while
+     sticky still takes over normally once content overflows. */
+  margin-top: auto;
 }
 
 .row-between {

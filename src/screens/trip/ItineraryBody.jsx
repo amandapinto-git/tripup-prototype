@@ -4,6 +4,7 @@ import { Bed, ForkKnife, Ticket, AirplaneTakeoff, Plus, Car, PersonSimpleWalk, N
 import PollCard from '../../components/PollCard';
 import MapsDrawer from '../../components/MapsDrawer';
 import AirlineLogo from '../../components/AirlineLogo';
+import AddPlanDecideDrawer from '../../components/AddPlanDecideDrawer';
 import { estimateTransit } from '../../utils/transit';
 
 const ICONS = {
@@ -49,6 +50,7 @@ export default function ItineraryBody({ trip }) {
   const requestedItem = params.get('item');
   const [activeDay, setActiveDay] = useState(requestedDay || trip.itinerary[0]?.date || allDays[0]?.date);
   const [mapsPlace, setMapsPlace] = useState(null);
+  const [decideOpen, setDecideOpen] = useState(false);
   const itemRefs = useRef({});
 
   useEffect(() => {
@@ -192,16 +194,21 @@ export default function ItineraryBody({ trip }) {
         )}
       </div>
 
-      <button
-        className="fab-btn"
-        onClick={() =>
-          navigate(`/trip/${trip.id}/add-plan?date=${day?.date || trip.start}&label=${encodeURIComponent(day?.label || '')}`)
-        }
-      >
+      <button className="fab-btn" onClick={() => setDecideOpen(true)}>
         <Plus size={16} weight="bold" /> Add an event
       </button>
 
       <MapsDrawer place={mapsPlace} onClose={() => setMapsPlace(null)} />
+      {decideOpen && (
+        <AddPlanDecideDrawer
+          onClose={() => setDecideOpen(false)}
+          onChoose={(mode) =>
+            navigate(
+              `/trip/${trip.id}/add-plan?date=${day?.date || trip.start}&label=${encodeURIComponent(day?.label || '')}&mode=${mode}`
+            )
+          }
+        />
+      )}
     </>
   );
 }
