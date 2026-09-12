@@ -14,6 +14,10 @@ import UnderlineField, { underlineInputStyle } from '../../components/UnderlineF
 import PillToggle from '../../components/PillToggle';
 import { YOU_ID } from '../../data/seed';
 
+// An itinerary item's own type already implies an expense category, so a
+// linked expense never needs to ask for one separately.
+const TYPE_TO_CATEGORY = { hotel: 'stay', food: 'food', flight: 'transport', activity: 'activities' };
+
 export default function AddExpenseFlow() {
   const { tripId } = useParams();
   const trip = useTrip(tripId);
@@ -104,7 +108,14 @@ export default function AddExpenseFlow() {
             items={itineraryItems}
             days={itineraryDays}
             selected={draft.itineraryItemId}
-            onSelect={(id) => setDraft((d) => ({ ...d, itineraryItemId: id }))}
+            onSelect={(id) => {
+              const item = itineraryItems.find((i) => i.id === id);
+              setDraft((d) => ({
+                ...d,
+                itineraryItemId: id,
+                category: item ? TYPE_TO_CATEGORY[item.type] || d.category : d.category,
+              }));
+            }}
             onNext={() => setStep(2)}
           />
         )}
@@ -425,10 +436,6 @@ function LinkedDetailsStep({ linkedItem, trip, draft, setDraft, onConfirm }) {
             />
           </div>
         </UnderlineField>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <FieldLabel>Category</FieldLabel>
-          <CategoryPicker selected={draft.category} onChange={(key) => setDraft((d) => ({ ...d, category: key }))} />
-        </div>
         <SplitFields trip={trip} draft={draft} setDraft={setDraft} />
       </div>
       <div className="bottom-bar">
