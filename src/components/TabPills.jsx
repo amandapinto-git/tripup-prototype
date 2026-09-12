@@ -1,9 +1,9 @@
-import { SquaresFour, BookOpen, ReceiptX } from '@phosphor-icons/react';
+import { SquaresFour, BookOpen, Invoice } from '@phosphor-icons/react';
 
 const TABS = [
   { id: 'overview', label: 'Overview', Icon: SquaresFour },
   { id: 'itinerary', label: 'Itineraries', Icon: BookOpen },
-  { id: 'expenses', label: 'Expenses', Icon: ReceiptX },
+  { id: 'expenses', label: 'Expenses', Icon: Invoice },
 ];
 
 export default function TabPills({ active, onChange, onPhoto = false }) {
