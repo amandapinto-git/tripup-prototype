@@ -232,44 +232,14 @@ export default function ExpensesBody({ trip }) {
 
       <div className="bottom-bar">
         <button
-          className="btn-scale"
-          style={{
-            flex: 1,
-            background: '#fff',
-            color: '#000',
-            border: '1.5px solid #000',
-            borderRadius: 999,
-            padding: '13px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            opacity: youOwe.length === 0 ? 0.4 : 1,
-          }}
+          className="btn btn-outline"
+          style={{ flex: 1 }}
           onClick={() => youOwe.forEach((s) => handleSettle(s.to, s.amount))}
           disabled={youOwe.length === 0}
         >
           <ArrowsLeftRight size={14} weight="bold" /> Settle all
         </button>
-        <button
-          className="btn-scale"
-          style={{
-            flex: 1,
-            background: '#000',
-            color: '#fff',
-            borderRadius: 999,
-            padding: '13px 0',
-            fontSize: 14,
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-          onClick={() => navigate(`/trip/${trip.id}/add-expense`)}
-        >
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => navigate(`/trip/${trip.id}/add-expense`)}>
           <Plus size={14} weight="bold" /> Add an expense
         </button>
       </div>

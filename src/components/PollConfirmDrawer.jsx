@@ -69,7 +69,7 @@ export default function PollConfirmDrawer({ tripId, poll, onClose }) {
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <button className="btn btn-primary" style={{ background: '#000' }} onClick={() => toActionsStep(match)}>
+                <button className="btn btn-primary" onClick={() => toActionsStep(match)}>
                   Yes, that's it
                 </button>
                 <button className="btn btn-outline" onClick={() => setStep('manual')}>
@@ -94,7 +94,6 @@ export default function PollConfirmDrawer({ tripId, poll, onClose }) {
               </div>
               <button
                 className="btn btn-primary"
-                style={{ background: '#000' }}
                 disabled={!manualValue.trim()}
                 onClick={() => toActionsStep({ name: manualValue.trim() })}
               >
@@ -112,7 +111,7 @@ export default function PollConfirmDrawer({ tripId, poll, onClose }) {
                   target="_blank"
                   rel="noreferrer"
                   className="btn btn-primary"
-                  style={{ background: '#000', textDecoration: 'none' }}
+                  style={{ textDecoration: 'none' }}
                 >
                   {reservationUrl ? 'Book now' : 'Search for reservations'} <ArrowSquareOut size={14} weight="bold" />
                 </a>

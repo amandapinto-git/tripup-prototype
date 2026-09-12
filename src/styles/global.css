@@ -14,7 +14,7 @@
   --border: rgba(0, 0, 0, 0.08);
   --border-soft: rgba(217, 217, 217, 0.5);
 
-  --accent: #16202a;
+  --accent: #000000;
   --accent-soft: #6e889a;
   --danger: #c66f6f;
   --success: #5aa63f;
@@ -456,7 +456,7 @@ img {
   width: 100%;
 }
 
-.btn-primary:disabled {
+.btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
@@ -591,10 +591,6 @@ img {
   background: #fff;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
-}
-
-.bottom-bar .btn-primary {
-  background: #000;
 }
 
 .row-between {

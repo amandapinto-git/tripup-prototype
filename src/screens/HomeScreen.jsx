@@ -87,7 +87,7 @@ export default function HomeScreen() {
               ))}
             </div>
           )}
-          <button className="btn btn-primary" style={{ background: '#000' }} onClick={() => navigate('/')}>
+          <button className="btn btn-primary" onClick={() => navigate('/')}>
             Create a New Trip
           </button>
         </section>

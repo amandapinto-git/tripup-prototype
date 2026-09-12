@@ -147,7 +147,7 @@ export default function PollCard({ tripId, poll, members, onOpenMaps }) {
           </div>
 
           {isCreator ? (
-            <button className="btn btn-primary" style={{ background: '#000' }} onClick={() => setConfirmOpen(true)}>
+            <button className="btn btn-primary" onClick={() => setConfirmOpen(true)}>
               Confirm the winner
             </button>
           ) : (
