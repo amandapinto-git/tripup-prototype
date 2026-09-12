@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, ArrowSquareOut } from '@phosphor-icons/react';
 import { useTripDispatch } from '../state/TripContext';
 import { pollWinner, resolveLocation, resolveReservation } from '../utils/polls';
+import LocationField from './LocationField';
 
 export default function PollConfirmDrawer({ tripId, poll, onClose }) {
   const dispatch = useTripDispatch();
@@ -84,14 +85,7 @@ export default function PollConfirmDrawer({ tripId, poll, onClose }) {
               <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>
                 {match ? "What's the right location?" : `Where is "${winner.text}"?`}
               </p>
-              <div className="field">
-                <label>Location</label>
-                <input
-                  value={manualValue}
-                  onChange={(e) => setManualValue(e.target.value)}
-                  placeholder="e.g. Taberna Ideal, Lisbon"
-                />
-              </div>
+              <LocationField value={manualValue} onChange={setManualValue} />
               <button
                 className="btn btn-primary"
                 disabled={!manualValue.trim()}
