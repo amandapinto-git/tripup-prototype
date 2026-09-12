@@ -18,6 +18,18 @@ const TRANSIT_MODES = [
   { icon: Car, duration: '14m', distance: '3.1mi' },
 ];
 
+// A flight has no `location`/`title` place name of its own — it's the
+// airport at whichever end of the leg is relevant to the direction being
+// asked about (the arrival city if it's the stop you just came from, the
+// departure city if it's the stop you're heading to next).
+function locationLabel(item, role) {
+  if (!item) return null;
+  if (item.type === 'flight') {
+    return role === 'origin' ? `${item.outbound.to.city} Airport` : `${item.outbound.from.city} Airport`;
+  }
+  return item.location || item.title;
+}
+
 // Trip dates are plain calendar dates ("2026-05-12"), not instants — every
 // step here stays in UTC so the viewer's own timezone can never shift a day
 // forward or back (that off-by-one is exactly what broke the active chip).
@@ -172,7 +184,12 @@ export default function ItineraryBody({ trip }) {
                     <TransitRow
                       lineStyle={transitLineStyle}
                       mode={transit}
-                      onNavigate={() => setMapsPlace(nextItem.title)}
+                      onNavigate={() =>
+                        setMapsPlace({
+                          origin: locationLabel(item, 'origin'),
+                          destination: locationLabel(nextItem, 'destination'),
+                        })
+                      }
                     />
                   )}
                 </div>

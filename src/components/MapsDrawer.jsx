@@ -1,40 +1,56 @@
 import { X, MapTrifold, NavigationArrow, Compass } from '@phosphor-icons/react';
 
-const APPS = [
-  {
-    id: 'apple',
-    name: 'Apple Maps',
-    color: '#000',
-    Icon: Compass,
-    url: (q) => `https://maps.apple.com/?q=${q}`,
-  },
-  {
-    id: 'google',
-    name: 'Google Maps',
-    color: '#1a73e8',
-    Icon: MapTrifold,
-    url: (q) => `https://www.google.com/maps/search/?api=1&query=${q}`,
-  },
-  {
-    id: 'waze',
-    name: 'Waze',
-    color: '#33ccff',
-    Icon: NavigationArrow,
-    url: (q) => `https://waze.com/ul?q=${q}&navigate=yes`,
-  },
-];
-
 export default function MapsDrawer({ place, onClose }) {
   if (!place) return null;
 
-  const query = encodeURIComponent(place);
+  // `place` is either a plain string (single-location search, e.g. tapping
+  // an itinerary item) or { origin, destination } (the transit arrow
+  // between two stops) — the latter gets real turn-by-turn directions
+  // instead of just a destination pin.
+  const destination = typeof place === 'object' ? place.destination : place;
+  const origin = typeof place === 'object' ? place.origin : null;
+  if (!destination) return null;
+
+  const dq = encodeURIComponent(destination);
+  const oq = origin ? encodeURIComponent(origin) : null;
+
+  const APPS = [
+    {
+      id: 'apple',
+      name: 'Apple Maps',
+      color: '#000',
+      Icon: Compass,
+      url: oq ? `https://maps.apple.com/?saddr=${oq}&daddr=${dq}&dirflg=d` : `https://maps.apple.com/?q=${dq}`,
+    },
+    {
+      id: 'google',
+      name: 'Google Maps',
+      color: '#1a73e8',
+      Icon: MapTrifold,
+      url: oq
+        ? `https://www.google.com/maps/dir/?api=1&origin=${oq}&destination=${dq}&travelmode=driving`
+        : `https://www.google.com/maps/search/?api=1&query=${dq}`,
+    },
+    {
+      id: 'waze',
+      name: 'Waze',
+      color: '#33ccff',
+      Icon: NavigationArrow,
+      // Waze always routes from the device's current location — it has no
+      // "from X" parameter, so a route request still only carries the
+      // destination here.
+      url: `https://waze.com/ul?q=${dq}&navigate=yes`,
+    },
+  ];
 
   return (
     <div className="sheet-overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="row-between" style={{ marginBottom: 20 }}>
           <div style={{ minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink-mute)' }}>Get directions to</p>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: 'var(--ink-mute)' }}>
+              {origin ? 'Get directions' : 'Get directions to'}
+            </p>
             <p
               style={{
                 margin: '2px 0 0',
@@ -45,7 +61,7 @@ export default function MapsDrawer({ place, onClose }) {
                 whiteSpace: 'nowrap',
               }}
             >
-              {place}
+              {origin ? `${origin} → ${destination}` : destination}
             </p>
           </div>
           <button className="icon-btn" style={{ flexShrink: 0 }} onClick={onClose}>
@@ -57,7 +73,7 @@ export default function MapsDrawer({ place, onClose }) {
           {APPS.map(({ id, name, color, Icon, url }) => (
             <a
               key={id}
-              href={url(query)}
+              href={url}
               target="_blank"
               rel="noreferrer"
               className="list-row"
