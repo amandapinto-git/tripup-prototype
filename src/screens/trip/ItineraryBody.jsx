@@ -5,6 +5,7 @@ import PollCard from '../../components/PollCard';
 import MapsDrawer from '../../components/MapsDrawer';
 import AirlineLogo from '../../components/AirlineLogo';
 import AddPlanDecideDrawer from '../../components/AddPlanDecideDrawer';
+import ItemDetailDrawer from '../../components/ItemDetailDrawer';
 import { estimateTransit } from '../../utils/transit';
 
 const ICONS = {
@@ -50,6 +51,7 @@ export default function ItineraryBody({ trip }) {
   const requestedItem = params.get('item');
   const [activeDay, setActiveDay] = useState(requestedDay || trip.itinerary[0]?.date || allDays[0]?.date);
   const [mapsPlace, setMapsPlace] = useState(null);
+  const [detailItem, setDetailItem] = useState(null);
   const [decideOpen, setDecideOpen] = useState(false);
   const itemRefs = useRef({});
 
@@ -175,7 +177,7 @@ export default function ItineraryBody({ trip }) {
                         onOpenMaps={() => setMapsPlace(`${item.outbound.to.city} Airport`)}
                       />
                     ) : (
-                      <ItemCard item={item} current={isCurrent} muted={muted} onOpenMaps={() => setMapsPlace(item.location || item.title)} />
+                      <ItemCard item={item} current={isCurrent} muted={muted} onOpenMaps={() => setDetailItem(item)} />
                     )}
                   </TimelineRow>
                   {showTransit && (
@@ -199,6 +201,14 @@ export default function ItineraryBody({ trip }) {
       </button>
 
       <MapsDrawer place={mapsPlace} onClose={() => setMapsPlace(null)} />
+      <ItemDetailDrawer
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        onGetDirections={() => {
+          setMapsPlace(detailItem.location || detailItem.title);
+          setDetailItem(null);
+        }}
+      />
       {decideOpen && (
         <AddPlanDecideDrawer
           onClose={() => setDecideOpen(false)}
