@@ -201,7 +201,15 @@ export default function ItineraryBody({ trip }) {
       </button>
 
       <MapsDrawer place={mapsPlace} onClose={() => setMapsPlace(null)} />
-      <ItemDetailDrawer key={detailItem?.id} item={detailItem} onClose={() => setDetailItem(null)} />
+      <ItemDetailDrawer
+        key={detailItem?.id}
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        onGetDirections={() => {
+          setMapsPlace(detailItem.location || detailItem.title);
+          setDetailItem(null);
+        }}
+      />
       {decideOpen && (
         <AddPlanDecideDrawer
           onClose={() => setDecideOpen(false)}

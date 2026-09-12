@@ -111,6 +111,21 @@ export default function InviteModal({ trip, onClose }) {
             </div>
           </div>
 
+          <div className="field">
+            <label>Or add by name</label>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Priya"
+                onKeyDown={(e) => e.key === 'Enter' && name.trim() && addFriend(name.trim())}
+              />
+              <button className="btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
+                Add
+              </button>
+            </div>
+          </div>
+
           {organiser && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <p className="section-title">Organiser</p>
@@ -158,22 +173,6 @@ export default function InviteModal({ trip, onClose }) {
               ))}
             </div>
           </div>
-
-          <div className="field">
-            <label>Or add by name</label>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Priya"
-                onKeyDown={(e) => e.key === 'Enter' && name.trim() && addFriend(name.trim())}
-              />
-              <button className="btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
-                Add
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

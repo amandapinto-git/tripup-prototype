@@ -4,7 +4,7 @@ import { trips as seedTrips } from '../data/seed';
 
 // Bump this whenever the seed/trip data shape changes so stale localStorage
 // from an earlier prototype iteration can't crash the app on load.
-const STORAGE_KEY = 'tripup-state-v15';
+const STORAGE_KEY = 'tripup-state-v16';
 
 // The "Dinner Restaurant Tokyo" poll is a scripted demo (see
 // PollCloseDemo.jsx): it's meant to always start "in progress" on a fresh

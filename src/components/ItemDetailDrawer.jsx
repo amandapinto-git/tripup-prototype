@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, NavigationArrow } from '@phosphor-icons/react';
 import { fetchLocationFacts } from '../utils/facts';
 
-export default function ItemDetailDrawer({ item, onClose }) {
+export default function ItemDetailDrawer({ item, onClose, onGetDirections }) {
   // undefined = not fetched yet (or still in flight), null = fetched but
   // nothing found, object = a result — distinguishing the first two lets
   // "loading" be derived instead of tracked as its own bit of state.
@@ -77,15 +77,10 @@ export default function ItemDetailDrawer({ item, onClose }) {
         )}
 
         {item.location && (
-          // A plain maps link rather than our own app-picker sheet — on a
-          // real device, the OS itself offers the installed maps apps
-          // (Apple Maps, Google Maps, Waze) for a link like this.
-          <a
-            href={`https://maps.apple.com/?q=${encodeURIComponent(item.location)}`}
-            target="_blank"
-            rel="noreferrer"
+          <button
             className="list-row"
-            style={{ width: '100%', textAlign: 'left', marginBottom: 16, textDecoration: 'none' }}
+            style={{ width: '100%', textAlign: 'left', marginBottom: 16 }}
+            onClick={onGetDirections}
           >
             <div style={{ minWidth: 0 }}>
               <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>Location</p>
@@ -94,7 +89,6 @@ export default function ItemDetailDrawer({ item, onClose }) {
                   margin: '2px 0 0',
                   fontSize: 14,
                   fontWeight: 600,
-                  color: 'var(--ink)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -104,7 +98,7 @@ export default function ItemDetailDrawer({ item, onClose }) {
               </p>
             </div>
             <NavigationArrow size={16} weight="fill" style={{ flexShrink: 0, transform: 'rotate(90deg)' }} />
-          </a>
+          </button>
         )}
       </div>
     </div>

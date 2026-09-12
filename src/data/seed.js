@@ -53,8 +53,8 @@ const portugalItinerary = [
       {
         id: 'it-1',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Check in starts from 16:00',
       },
       {
@@ -81,8 +81,8 @@ const portugalItinerary = [
       {
         id: 'it-4',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Day 2',
       },
       {
@@ -125,8 +125,8 @@ const portugalItinerary = [
       {
         id: 'it-8',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Day 3',
       },
       {
@@ -159,8 +159,8 @@ const portugalItinerary = [
       {
         id: 'it-9',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Day 4',
       },
       {
@@ -193,8 +193,8 @@ const portugalItinerary = [
       {
         id: 'it-10',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Day 5',
       },
       {
@@ -220,8 +220,8 @@ const portugalItinerary = [
       {
         id: 'it-11',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Day 6',
       },
       {
@@ -254,8 +254,8 @@ const portugalItinerary = [
       {
         id: 'it-12',
         type: 'hotel',
-        title: 'LX Boutique Hotel Lisbon',
-        location: 'Rua do Alecrim 12, Lisbon',
+        title: 'Four Seasons Hotel Ritz Lisbon',
+        location: 'Rua Rodrigo da Fonseca 88, Lisbon',
         time: 'Check out by 11:00',
       },
       {
@@ -287,7 +287,7 @@ const portugalExpenses = [
   },
   {
     id: 'ex-2',
-    description: 'LX Boutique Hotel Lisbon',
+    description: 'Four Seasons Hotel Ritz Lisbon',
     amount: 900,
     category: 'stay',
     paidBy: YOU_ID,
@@ -357,7 +357,7 @@ export const trips = [
     expenses: portugalExpenses,
     recentActivity: [
       { id: 'act-1', memberId: 'anna', verb: 'added', subject: 'Dinner at Cervejaria Ramiro', when: '2 days ago' },
-      { id: 'act-2', memberId: 'jen', verb: 'booked', subject: 'LX Boutique Hotel Lisbon', when: '3 days ago' },
+      { id: 'act-2', memberId: 'jen', verb: 'booked', subject: 'Four Seasons Hotel Ritz Lisbon', when: '3 days ago' },
       { id: 'act-3', memberId: YOU_ID, verb: 'added the', subject: 'DXB → LIS flight', when: '4 days ago' },
     ],
   },
