@@ -54,13 +54,15 @@ export default function AddExpenseFlow() {
     else setStep((s) => s - 1);
   };
 
+  const linkedItem = itineraryItems.find((i) => i.id === draft.itineraryItemId);
+
   const finish = () => {
     dispatch({
       type: 'ADD_EXPENSE',
       tripId,
       expense: {
         id: `ex-${Date.now()}`,
-        description: draft.description || 'Untitled expense',
+        description: linkedItem?.title || draft.description || 'Untitled expense',
         amount: Number(draft.amount) || 0,
         category: draft.category,
         paidBy: YOU_ID,
@@ -106,13 +108,11 @@ export default function AddExpenseFlow() {
             onNext={() => setStep(2)}
           />
         )}
-        {step === 2 && (
-          <DetailsStep
-            draft={draft}
-            setDraft={setDraft}
-            onNext={() => setStep(3)}
-          />
-        )}
+        {step === 2 && (draft.itineraryItemId !== null ? (
+          <LinkedDetailsStep linkedItem={linkedItem} trip={trip} draft={draft} setDraft={setDraft} onConfirm={finish} />
+        ) : (
+          <DetailsStep draft={draft} setDraft={setDraft} onNext={() => setStep(3)} />
+        ))}
         {step === 3 && (
           <SplitStep trip={trip} draft={draft} setDraft={setDraft} onConfirm={finish} />
         )}
@@ -279,7 +279,10 @@ function DetailsStep({ draft, setDraft, onNext }) {
   );
 }
 
-function SplitStep({ trip, draft, setDraft, onConfirm }) {
+// Shared by the standalone SplitStep (no linked item) and LinkedDetailsStep
+// (linked item — amount, category and split all collapse onto one page
+// since the item itself already stands in for a description).
+function SplitFields({ trip, draft, setDraft }) {
   const isCustom = draft.splitType === 'custom';
   const perPerson = draft.splitWith.length ? Number(draft.amount) / draft.splitWith.length : 0;
   const assigned = draft.splitWith.reduce((sum, id) => sum + (Number(draft.customSplit[id]) || 0), 0);
@@ -295,87 +298,138 @@ function SplitStep({ trip, draft, setDraft, onConfirm }) {
     setDraft((d) => ({ ...d, customSplit: { ...d.customSplit, [id]: value } }));
   };
 
-  const canConfirm =
-    draft.splitWith.length > 0 && (!isCustom || draft.splitWith.every((id) => Number(draft.customSplit[id]) > 0));
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <FieldLabel>Split Options</FieldLabel>
+        <PillToggle
+          value={draft.splitType}
+          onChange={(splitType) => setDraft((d) => ({ ...d, splitType }))}
+          options={[
+            { value: 'equal', label: 'Equally' },
+            { value: 'custom', label: 'Custom' },
+          ]}
+        />
+      </div>
 
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {trip.members.map((m) => {
+          const included = draft.splitWith.includes(m.id);
+          return (
+            <div key={m.id} className="list-row">
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <Avatar member={m} size={32} />
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{m.id === 'you' ? 'You' : m.name}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                {included && isCustom ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>$</span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="0"
+                      value={draft.customSplit[m.id] ?? ''}
+                      onChange={(e) => setCustomAmount(m.id, e.target.value)}
+                      style={{
+                        width: 56,
+                        border: 'none',
+                        outline: 'none',
+                        background: 'transparent',
+                        fontSize: 14,
+                        fontWeight: 600,
+                        color: 'var(--ink)',
+                        textAlign: 'right',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <span style={{ fontSize: 14, fontWeight: 600 }}>
+                    {included ? `$${perPerson.toFixed(0)}` : '—'}
+                  </span>
+                )}
+                <button
+                  onClick={() => toggleMember(m.id)}
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 6,
+                    border: `1.5px solid ${included ? 'var(--accent)' : 'var(--border)'}`,
+                    background: included ? 'var(--accent)' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  {included && <Check size={13} weight="bold" color="#fff" />}
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {isCustom && (
+        <p style={{ margin: 0, fontSize: 13, color: assigned === Number(draft.amount) ? 'var(--ink-mute)' : 'var(--danger)' }}>
+          Assigned ${assigned.toFixed(0)} of ${(Number(draft.amount) || 0).toFixed(0)}
+        </p>
+      )}
+    </>
+  );
+}
+
+function canConfirmSplit(draft) {
+  const isCustom = draft.splitType === 'custom';
+  return draft.splitWith.length > 0 && (!isCustom || draft.splitWith.every((id) => Number(draft.customSplit[id]) > 0));
+}
+
+function SplitStep({ trip, draft, setDraft, onConfirm }) {
   return (
     <>
       <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <FieldLabel>Split Options</FieldLabel>
-          <PillToggle
-            value={draft.splitType}
-            onChange={(splitType) => setDraft((d) => ({ ...d, splitType }))}
-            options={[
-              { value: 'equal', label: 'Equally' },
-              { value: 'custom', label: 'Custom' },
-            ]}
-          />
-        </div>
+        <SplitFields trip={trip} draft={draft} setDraft={setDraft} />
+      </div>
+      <div className="bottom-bar">
+        <button className="btn btn-primary" disabled={!canConfirmSplit(draft)} onClick={onConfirm}>
+          Confirm & Add
+        </button>
+      </div>
+    </>
+  );
+}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {trip.members.map((m) => {
-            const included = draft.splitWith.includes(m.id);
-            return (
-              <div key={m.id} className="list-row">
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  <Avatar member={m} size={32} />
-                  <span style={{ fontSize: 14, fontWeight: 600 }}>{m.id === 'you' ? 'You' : m.name}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                  {included && isCustom ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>$</span>
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        placeholder="0"
-                        value={draft.customSplit[m.id] ?? ''}
-                        onChange={(e) => setCustomAmount(m.id, e.target.value)}
-                        style={{
-                          width: 56,
-                          border: 'none',
-                          outline: 'none',
-                          background: 'transparent',
-                          fontSize: 14,
-                          fontWeight: 600,
-                          color: 'var(--ink)',
-                          textAlign: 'right',
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <span style={{ fontSize: 14, fontWeight: 600 }}>
-                      {included ? `$${perPerson.toFixed(0)}` : '—'}
-                    </span>
-                  )}
-                  <button
-                    onClick={() => toggleMember(m.id)}
-                    style={{
-                      width: 22,
-                      height: 22,
-                      borderRadius: 6,
-                      border: `1.5px solid ${included ? 'var(--accent)' : 'var(--border)'}`,
-                      background: included ? 'var(--accent)' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {included && <Check size={13} weight="bold" color="#fff" />}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+// The item being linked already carries its own title, so a separate
+// description would just repeat it — amount, category and split all
+// collapse onto this one page instead of the two an unlinked expense uses.
+function LinkedDetailsStep({ linkedItem, trip, draft, setDraft, onConfirm }) {
+  const canConfirm = Number(draft.amount) > 0 && canConfirmSplit(draft);
+  return (
+    <>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+        <div>
+          <FieldLabel>Linked item</FieldLabel>
+          <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 600 }}>{linkedItem?.title}</p>
         </div>
-
-        {isCustom && (
-          <p style={{ margin: 0, fontSize: 13, color: assigned === Number(draft.amount) ? 'var(--ink-mute)' : 'var(--danger)' }}>
-            Assigned ${assigned.toFixed(0)} of ${(Number(draft.amount) || 0).toFixed(0)}
-          </p>
-        )}
+        <UnderlineField label="Amount">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ fontSize: 22, fontWeight: 400, color: 'var(--ink-mute)' }}>$</span>
+            <input
+              type="number"
+              inputMode="decimal"
+              placeholder="0"
+              value={draft.amount}
+              onChange={(e) => setDraft((d) => ({ ...d, amount: e.target.value }))}
+              className="poll-underline-input"
+              style={underlineInputStyle()}
+            />
+          </div>
+        </UnderlineField>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <FieldLabel>Category</FieldLabel>
+          <CategoryPicker selected={draft.category} onChange={(key) => setDraft((d) => ({ ...d, category: key }))} />
+        </div>
+        <SplitFields trip={trip} draft={draft} setDraft={setDraft} />
       </div>
       <div className="bottom-bar">
         <button className="btn btn-primary" disabled={!canConfirm} onClick={onConfirm}>
