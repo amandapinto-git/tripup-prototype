@@ -252,7 +252,7 @@ function DetailsStep({ draft, setDraft, onNext }) {
   const canContinue = draft.description.trim() && Number(draft.amount) > 0;
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 36, paddingBottom: 32 }}>
         <UnderlineField label="Description">
           <input
             placeholder="eg. Cervejaria Ramiro"
@@ -398,7 +398,7 @@ function canConfirmSplit(draft) {
 function SplitStep({ trip, draft, setDraft, onConfirm }) {
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 36, paddingBottom: 32 }}>
         <SplitFields trip={trip} draft={draft} setDraft={setDraft} />
       </div>
       <div className="bottom-bar">
@@ -417,7 +417,7 @@ function LinkedDetailsStep({ linkedItem, trip, draft, setDraft, onConfirm }) {
   const canConfirm = Number(draft.amount) > 0 && canConfirmSplit(draft);
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 36, paddingBottom: 32 }}>
         <div>
           <FieldLabel>Linked item</FieldLabel>
           <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 600 }}>{linkedItem?.title}</p>

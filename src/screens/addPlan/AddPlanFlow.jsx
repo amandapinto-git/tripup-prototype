@@ -175,7 +175,7 @@ function DecideStep({ onKnown, onVote }) {
 function KnownForm({ item, setItem, onSubmit, date, setDate, trip }) {
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 36, paddingBottom: 32 }}>
         <UnderlineField label="What's the plan?">
           <input
             placeholder="eg. Dinner at Cervejaria Ramiro"
@@ -227,7 +227,7 @@ function PollForm({ poll, setPoll, onSubmit, date, setDate, trip }) {
 
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 36, paddingBottom: 32 }}>
         <UnderlineField label="What is being decided?">
           <input
             placeholder="eg. Friday's dinner restaurant"
