@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CaretLeft, ShareFat } from '@phosphor-icons/react';
+import { CaretLeft, UserPlus } from '@phosphor-icons/react';
 import StatusBar from './StatusBar';
 import TabPills from './TabPills';
 import AvatarChips from './AvatarChips';
@@ -56,7 +56,7 @@ export default function TripHeroHeader({ trip, tab, onNavigateTab, onBack, onInv
           </button>
 
           <button className="icon-btn on-photo" onClick={onInvite}>
-            <ShareFat size={18} weight="bold" />
+            <UserPlus size={18} weight="bold" />
           </button>
         </div>
       </div>
