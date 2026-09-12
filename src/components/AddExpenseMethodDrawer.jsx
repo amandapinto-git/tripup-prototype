@@ -5,7 +5,7 @@ export default function AddExpenseMethodDrawer({ onClose, onChoose }) {
     <div className="sheet-overlay" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()}>
         <div className="row-between" style={{ alignItems: 'flex-start', marginBottom: 16, gap: 12 }}>
-          <p style={{ margin: 0, fontSize: 24, fontWeight: 600 }}>Select a way to add an expense</p>
+          <p style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>Select a way to add an expense</p>
           <button className="icon-btn" style={{ flexShrink: 0 }} onClick={onClose}>
             <X size={16} weight="bold" />
           </button>

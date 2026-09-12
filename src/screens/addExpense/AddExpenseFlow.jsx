@@ -36,7 +36,13 @@ export default function AddExpenseFlow() {
   });
 
   const itineraryItems = useMemo(
-    () => trip?.itinerary.flatMap((d) => d.items.filter((i) => i.type !== 'poll').map((i) => ({ ...i, day: d.label }))) || [],
+    () =>
+      trip?.itinerary.flatMap((d) => d.items.filter((i) => i.type !== 'poll').map((i) => ({ ...i, day: d.label, date: d.date }))) ||
+      [],
+    [trip]
+  );
+  const itineraryDays = useMemo(
+    () => trip?.itinerary.filter((d) => d.items.some((i) => i.type !== 'poll')).map((d) => ({ date: d.date, label: d.label })) || [],
     [trip]
   );
 
@@ -89,6 +95,7 @@ export default function AddExpenseFlow() {
         {step === 1 && (
           <LinkStep
             items={itineraryItems}
+            days={itineraryDays}
             selected={draft.itineraryItemId}
             onSelect={(id) => setDraft((d) => ({ ...d, itineraryItemId: id }))}
             onNext={() => setStep(2)}
@@ -127,21 +134,77 @@ function MethodStep({ onManual, onScan }) {
   );
 }
 
-function LinkStep({ items, selected, onSelect, onNext }) {
+function LinkStep({ items, days, selected, onSelect, onNext }) {
+  const [activeDay, setActiveDay] = useState(null); // null = All
+
+  const visibleItems = activeDay ? items.filter((i) => i.date === activeDay) : items;
+
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, paddingBottom: 32 }}>
+      <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '32px 24px 16px' }}>
+        <button
+          onClick={() => setActiveDay(null)}
+          style={{
+            flex: '1 0 0',
+            minWidth: 64,
+            padding: '14px 18px',
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: activeDay === null ? '#000' : '#fff',
+            border: `1px solid ${activeDay === null ? '#000' : 'rgba(0,0,0,0.1)'}`,
+          }}
+        >
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: activeDay === null ? '#fff' : 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+            All
+          </p>
+        </button>
+        {days.map((d) => {
+          const [weekday, rest] = d.label.split(', ');
+          const active = d.date === activeDay;
+          return (
+            <button
+              key={d.date}
+              onClick={() => setActiveDay(d.date)}
+              style={{
+                flex: '1 0 0',
+                minWidth: 76,
+                padding: '14px 22px',
+                borderRadius: 10,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                background: active ? '#000' : '#fff',
+                border: `1px solid ${active ? '#000' : 'rgba(0,0,0,0.1)'}`,
+              }}
+            >
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: active ? '#fff' : 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+                {weekday}
+              </p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 400, color: active ? 'rgba(255,255,255,0.75)' : 'var(--ink-soft)', whiteSpace: 'nowrap' }}>
+                {rest}
+              </p>
+            </button>
+          );
+        })}
+      </div>
+      <div className="screen-pad" style={{ paddingTop: 8, paddingBottom: 32 }}>
         <p style={{ margin: '0 0 20px', fontSize: 20, fontWeight: 600 }}>Link an itinerary item to this expense</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <button
-            className="list-row"
-            style={{ width: '100%', textAlign: 'left', background: selected === null ? 'var(--surface-card)' : 'transparent' }}
-            onClick={() => onSelect(null)}
-          >
-            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>Don't link an item</span>
-            {selected === null && <Check size={16} weight="bold" />}
-          </button>
-          {items.map((item) => (
+          {activeDay === null && (
+            <button
+              className="list-row"
+              style={{ width: '100%', textAlign: 'left', background: selected === null ? 'var(--surface-card)' : 'transparent' }}
+              onClick={() => onSelect(null)}
+            >
+              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>Don't link an item</span>
+              {selected === null && <Check size={16} weight="bold" />}
+            </button>
+          )}
+          {visibleItems.map((item) => (
             <button
               key={item.id}
               className="list-row"
@@ -155,6 +218,9 @@ function LinkStep({ items, selected, onSelect, onNext }) {
               {selected === item.id && <Check size={16} weight="bold" />}
             </button>
           ))}
+          {activeDay !== null && visibleItems.length === 0 && (
+            <p style={{ margin: 0, fontSize: 14, color: 'var(--ink-mute)' }}>Nothing planned this day.</p>
+          )}
         </div>
       </div>
       <div className="bottom-bar">
