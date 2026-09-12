@@ -4,6 +4,10 @@ import Avatar from './Avatar';
 import { AVATAR_COLORS, YOU_ID, allMembers } from '../data/seed';
 import { useTripDispatch, useTripState } from '../state/TripContext';
 
+// Shown only when there's no real cross-trip overlap to suggest, so the
+// section always has something in it rather than disappearing.
+const PLACEHOLDER_FRIENDS = ['Priya', 'Sam', 'Leo', 'Frankie'];
+
 export default function InviteModal({ trip, onClose }) {
   const dispatch = useTripDispatch();
   const { trips } = useTripState();
@@ -55,8 +59,8 @@ export default function InviteModal({ trip, onClose }) {
   const otherMembers = trip.members.filter((m) => m.id !== YOU_ID);
 
   return (
-    <div className="sheet-overlay" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()}>
+    <div className="sheet-overlay sheet-overlay-right" onClick={onClose}>
+      <div className="sheet-right" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <div className="row-between">
             <p style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>Add a friend</p>
@@ -77,6 +81,35 @@ export default function InviteModal({ trip, onClose }) {
             </div>
             {copied ? <span className="toast">Copied!</span> : <span style={{ fontSize: 14, color: 'var(--ink-mute)' }}>Copy</span>}
           </button>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <p className="section-title">From your trips</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {friendsFromOtherTrips.length > 0
+                ? friendsFromOtherTrips.map((m) => (
+                    <div key={m.id} className="list-row">
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <Avatar member={m} size={32} />
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</span>
+                      </div>
+                      <button className="btn-outline btn-sm" onClick={() => addExistingFriend(m)}>
+                        Invite
+                      </button>
+                    </div>
+                  ))
+                : PLACEHOLDER_FRIENDS.filter((s) => !added.includes(s.toLowerCase())).map((s) => (
+                    <div key={s} className="list-row">
+                      <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                        <Avatar member={{ initial: s[0], color: '#c7ccd1' }} size={32} />
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{s}</span>
+                      </div>
+                      <button className="btn-outline btn-sm" onClick={() => addFriend(s)}>
+                        Invite
+                      </button>
+                    </div>
+                  ))}
+            </div>
+          </div>
 
           {organiser && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -141,24 +174,6 @@ export default function InviteModal({ trip, onClose }) {
             </div>
           </div>
 
-          {friendsFromOtherTrips.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <p className="section-title">From your other trips</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {friendsFromOtherTrips.map((m) => (
-                  <div key={m.id} className="list-row">
-                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <Avatar member={m} size={32} />
-                      <span style={{ fontSize: 14, fontWeight: 600 }}>{m.name}</span>
-                    </div>
-                    <button className="btn-outline btn-sm" onClick={() => addExistingFriend(m)}>
-                      Invite
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

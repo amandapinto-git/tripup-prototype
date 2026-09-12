@@ -67,7 +67,7 @@ export default function OverviewBody({ trip }) {
                       onClick={() =>
                         navigate(`/trip/${trip.id}?tab=itinerary&day=${trip.currentDate}&item=${item.id}`)
                       }
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', textAlign: 'left' }}
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '18px 16px', textAlign: 'left' }}
                     >
                       <Icon size={16} weight="regular" style={{ flexShrink: 0 }} />
                       <p

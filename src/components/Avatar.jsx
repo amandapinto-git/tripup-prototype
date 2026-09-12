@@ -26,7 +26,7 @@ export function AvatarStack({ members, max = 4, size = 24 }) {
           key={m.id}
           member={m}
           size={size}
-          style={{ marginLeft: i === 0 ? 0 : -8, border: '2px solid #fff' }}
+          style={{ marginLeft: i === 0 ? 0 : -8, border: '1px solid #fff' }}
         />
       ))}
       {overflow > 0 && (
@@ -39,7 +39,7 @@ export function AvatarStack({ members, max = 4, size = 24 }) {
             background: '#e3e3e3',
             color: '#666',
             fontSize: 10,
-            border: '2px solid #fff',
+            border: '1px solid #fff',
           }}
         >
           +{overflow}

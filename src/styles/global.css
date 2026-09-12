@@ -709,11 +709,41 @@ img {
   animation: slide-up 0.2s ease;
 }
 
+/* Right-anchored full-height variant — used where the trigger is a
+   top-right button, so the panel arrives from the same side rather than
+   sliding up from the bottom. */
+.sheet-overlay-right {
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.sheet-right {
+  width: 86%;
+  max-width: 360px;
+  height: 100%;
+  background: var(--surface);
+  border-radius: 24px 0 0 24px;
+  padding: 24px 24px 32px;
+  overflow-y: auto;
+  animation: slide-left 0.2s ease;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
   }
   to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-left {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
     opacity: 1;
   }
 }
