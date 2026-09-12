@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Bed, ForkKnife, Ticket, AirplaneTakeoff, Plus, Car, PersonSimpleWalk, NavigationArrow } from '@phosphor-icons/react';
 import PollCard from '../../components/PollCard';
 import MapsDrawer from '../../components/MapsDrawer';
+import AirlineLogo from '../../components/AirlineLogo';
 import { estimateTransit } from '../../utils/transit';
 
 const ICONS = {
@@ -399,7 +400,9 @@ function FlightCard({ item, muted, onOpenMaps }) {
       }}
     >
       <div>
-        <p style={{ margin: '0 0 6px', fontSize: 18, fontWeight: 600, fontStyle: 'italic' }}>{item.airline}</p>
+        <div style={{ marginBottom: 8 }}>
+          <AirlineLogo airline={item.airline} variant="black" height={16} />
+        </div>
         <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: 'var(--ink-mute)' }}>Flight Code: {item.outbound.code}</p>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

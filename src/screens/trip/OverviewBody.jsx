@@ -3,6 +3,7 @@ import { Plus, AirplaneTakeoff, Bed, ForkKnife, Ticket, CaretRight } from '@phos
 import AvatarChips from '../../components/AvatarChips';
 import Avatar from '../../components/Avatar';
 import CategoryIcon from '../../components/CategoryIcon';
+import AirlineLogo from '../../components/AirlineLogo';
 
 const TODAY_ICONS = {
   hotel: Bed,
@@ -213,7 +214,7 @@ function FlightTicketCard({ item, members }) {
     <div style={{ background: '#000', borderRadius: 12, padding: 20, color: '#fff', overflow: 'hidden' }}>
       <div className="row-between">
         <div>
-          <p style={{ margin: 0, fontSize: 18, fontWeight: 600, fontStyle: 'italic' }}>{item.airline}</p>
+          <AirlineLogo airline={item.airline} variant="white" height={18} />
           <p style={{ margin: '8px 0 0', fontSize: 14 }}>Flight Code: {item.outbound.code}</p>
         </div>
         <AvatarChips members={members} size={24} max={4} />
