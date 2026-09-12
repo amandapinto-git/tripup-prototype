@@ -7,6 +7,7 @@ import CategoryIcon from '../../components/CategoryIcon';
 import { totalsByCategory, yourShareByCategory, computePairwiseBalances, formatMoney } from '../../utils/balances';
 import { CATEGORY_META, YOU_ID } from '../../data/seed';
 import { useTripDispatch } from '../../state/TripContext';
+import AddExpenseMethodDrawer from '../../components/AddExpenseMethodDrawer';
 
 function memberById(members, id) {
   return members.find((m) => m.id === id);
@@ -26,6 +27,7 @@ export default function ExpensesBody({ trip }) {
   const dispatch = useTripDispatch();
   const [scope, setScope] = useState('group');
   const [justSettled, setJustSettled] = useState(null);
+  const [methodOpen, setMethodOpen] = useState(false);
   // Captured once from router state (set by AddExpenseFlow on submit) so it
   // survives even though the flow's own screen has already unmounted.
   const [toast, setToast] = useState(location.state?.toast || null);
@@ -239,10 +241,17 @@ export default function ExpensesBody({ trip }) {
         >
           <ArrowsLeftRight size={14} weight="bold" /> Settle all
         </button>
-        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => navigate(`/trip/${trip.id}/add-expense`)}>
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => setMethodOpen(true)}>
           <Plus size={14} weight="bold" /> Add an expense
         </button>
       </div>
+
+      {methodOpen && (
+        <AddExpenseMethodDrawer
+          onClose={() => setMethodOpen(false)}
+          onChoose={(method) => navigate(`/trip/${trip.id}/add-expense?method=${method}`)}
+        />
+      )}
 
       <AnimatePresence>
         {toast && (

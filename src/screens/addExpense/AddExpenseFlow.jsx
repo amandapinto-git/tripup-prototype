@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   CaretLeft,
   Camera,
@@ -19,11 +19,16 @@ export default function AddExpenseFlow() {
   const trip = useTrip(tripId);
   const navigate = useNavigate();
   const dispatch = useTripDispatch();
+  const [params] = useSearchParams();
+  // Usually arrives already decided — AddExpenseMethodDrawer asks "scan vs
+  // manual" up front and passes the answer via ?method=. Falling back to
+  // the in-flow MethodStep below only matters for a direct/bookmarked URL.
+  const method = params.get('method');
 
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(method === 'scan' ? 2 : method === 'manual' ? 1 : 0);
   const [draft, setDraft] = useState({
-    description: '',
-    amount: '',
+    description: method === 'scan' ? 'Oysho Restaurant Tokyo' : '',
+    amount: method === 'scan' ? '86' : '',
     category: 'food',
     itineraryItemId: null,
     splitType: 'equal',
