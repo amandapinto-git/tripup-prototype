@@ -73,7 +73,7 @@ export default function ExpensesBody({ trip }) {
                 onClick={() => setScope('group')}
                 title="Group expenses"
               >
-                <UsersThree size={18} weight={scope === 'group' ? 'fill' : 'regular'} />
+                <UsersThree size={18} weight="regular" />
               </button>
               <button
                 className="icon-btn"
@@ -81,7 +81,7 @@ export default function ExpensesBody({ trip }) {
                 onClick={() => setScope('me')}
                 title="Just me"
               >
-                <User size={18} weight={scope === 'me' ? 'fill' : 'regular'} />
+                <User size={18} weight="regular" />
               </button>
             </div>
           </div>

@@ -16,7 +16,7 @@ export default function TabPills({ active, onChange, onPhoto = false }) {
           onClick={() => onChange(id)}
           type="button"
         >
-          <Icon size={15} weight={active === id ? 'fill' : 'regular'} />
+          <Icon size={15} weight="regular" />
           <span>{label}</span>
         </button>
       ))}
