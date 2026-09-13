@@ -13,6 +13,14 @@ const chipStyle = (selected) => ({
   border: `1px solid ${selected ? '#000' : 'var(--border)'}`,
 });
 
+// No avatar to hug, so "All" gets its own even padding instead of the
+// member chips' avatar-on-the-left 6/14 split — otherwise it reads as
+// narrower and off-balance next to them.
+const allChipStyle = (selected) => ({
+  ...chipStyle(selected),
+  padding: '8px 18px',
+});
+
 // The one member-chip look shared by "who paid" (single-select — onToggle
 // just replaces the selection) and "who had this item" (multi-select —
 // onToggle adds/removes) so both feel like the same control. `onToggleAll`
@@ -22,9 +30,11 @@ const chipStyle = (selected) => ({
 export default function MemberChipRow({ members, selectedIds, onToggle, onToggleAll }) {
   const allSelected = members.every((m) => selectedIds.includes(m.id));
   return (
-    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: 0, padding: 0 }}>
+    // Bleeds past the screen's 24px side padding (see .screen-pad) so the
+    // row can actually scroll edge to edge instead of being boxed in by it.
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', margin: '0 -24px', padding: '0 24px' }}>
       {onToggleAll && (
-        <button onClick={onToggleAll} style={chipStyle(allSelected)}>
+        <button onClick={onToggleAll} style={allChipStyle(allSelected)}>
           <span style={{ fontSize: 14, fontWeight: 600, color: allSelected ? '#fff' : 'var(--ink)', whiteSpace: 'nowrap' }}>
             All
           </span>
