@@ -10,7 +10,7 @@ const WALK_PATH_INFLATION = 1.3; // real streets aren't a straight line
 const geocodeCache = new Map();
 const transitCache = new Map();
 
-async function geocode(address) {
+export async function geocode(address) {
   if (geocodeCache.has(address)) return geocodeCache.get(address);
   const promise = (async () => {
     try {

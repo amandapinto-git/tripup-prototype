@@ -12,7 +12,7 @@ export default function ItemDetailDrawer({ item, onClose, onGetDirections, onCan
   useEffect(() => {
     if (!item?.location) return undefined;
     let cancelled = false;
-    fetchLocationFacts(item.title).then((result) => {
+    fetchLocationFacts(item.title, item.location).then((result) => {
       if (!cancelled) setFacts(result);
     });
     return () => {
