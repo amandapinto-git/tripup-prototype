@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CaretLeft, Plus, UserSwitch, PencilSimpleLine, X, Clock, Check } from '@phosphor-icons/react';
 import { useTrip, useTripDispatch } from '../../state/TripContext';
@@ -215,6 +215,28 @@ function PollForm({ poll, setPoll, onSubmit, date, setDate, trip }) {
     setPoll((d) => ({ ...d, options: d.options.map((o, idx) => (idx === i ? value : o)) }));
   const addOption = () => setPoll((d) => ({ ...d, options: [...d.options, ''] }));
 
+  // Enter on the last option adds a new one and needs to wait for it to
+  // actually exist in the DOM before focusing it — a ref survives the
+  // render that setPoll triggers, a plain variable wouldn't.
+  const optionRefs = useRef([]);
+  const focusNewOptionRef = useRef(false);
+  useEffect(() => {
+    if (!focusNewOptionRef.current) return;
+    focusNewOptionRef.current = false;
+    optionRefs.current[poll.options.length - 1]?.focus();
+  }, [poll.options.length]);
+
+  const handleOptionEnter = (e, i) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (i + 1 < poll.options.length) {
+      optionRefs.current[i + 1]?.focus();
+    } else {
+      focusNewOptionRef.current = true;
+      addOption();
+    }
+  };
+
   const setTimeOption = (i, value) =>
     setPoll((d) => ({ ...d, timeOptions: d.timeOptions.map((o, idx) => (idx === i ? value : o)) }));
   const addTimeOption = () => setPoll((d) => ({ ...d, timeOptions: [...d.timeOptions, ''] }));
@@ -256,10 +278,14 @@ function PollForm({ poll, setPoll, onSubmit, date, setDate, trip }) {
             {poll.options.map((opt, i) => (
               <input
                 key={i}
+                ref={(el) => {
+                  optionRefs.current[i] = el;
+                }}
                 className="input-box"
                 placeholder={`Option ${i + 1}`}
                 value={opt}
                 onChange={(e) => setOption(i, e.target.value)}
+                onKeyDown={(e) => handleOptionEnter(e, i)}
               />
             ))}
             <button className="input-box" style={{ color: '#acacac', justifyContent: 'flex-start' }} onClick={addOption}>
@@ -382,27 +408,35 @@ function TimeField({ value, onChange, showLabel = true, placeholder }) {
   const isAllDay = value === ALL_DAY;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div className="row-between">
-        {showLabel ? <FieldLabel>Time</FieldLabel> : <span />}
+      {showLabel && <FieldLabel>Time</FieldLabel>}
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        {!isAllDay && (
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <TimePickerField value={value} onChange={onChange} placeholder={placeholder} />
+          </div>
+        )}
         <button
           onClick={() => onChange(isAllDay ? '' : ALL_DAY)}
           style={{
+            flex: isAllDay ? 1 : 'none',
+            height: 48,
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: 6,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 600,
             color: isAllDay ? '#fff' : 'var(--ink-soft)',
             background: isAllDay ? '#000' : 'transparent',
             border: `1px solid ${isAllDay ? '#000' : 'var(--border)'}`,
-            borderRadius: 999,
-            padding: '5px 12px',
+            borderRadius: 16,
+            padding: '0 16px',
+            flexShrink: 0,
           }}
         >
           {isAllDay && <Check size={12} weight="bold" />} All day
         </button>
       </div>
-      {!isAllDay && <TimePickerField value={value} onChange={onChange} placeholder={placeholder} />}
     </div>
   );
 }
