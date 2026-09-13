@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import Avatar from '../../components/Avatar';
 import CategoryIcon from '../../components/CategoryIcon';
-import { totalsByCategory, yourShareByCategory, computePairwiseBalances, formatMoney } from '../../utils/balances';
+import { totalsByCategory, yourShareByCategory, computeSimplifiedBalances, formatMoney } from '../../utils/balances';
 import { CATEGORY_META, YOU_ID } from '../../data/seed';
 import { useTripDispatch } from '../../state/TripContext';
 import AddExpenseMethodDrawer from '../../components/AddExpenseMethodDrawer';
@@ -45,7 +45,7 @@ export default function ExpensesBody({ trip }) {
     scope === 'group'
       ? totalsByCategory(scopedExpenses.filter((e) => !e.isSettlement))
       : yourShareByCategory(trip.expenses, trip.members, YOU_ID);
-  const { youOwe, owedToYou } = computePairwiseBalances(trip.expenses, trip.members, YOU_ID);
+  const { youOwe, owedToYou } = computeSimplifiedBalances(trip.expenses, trip.members, YOU_ID);
 
   const transactions = [...scopedExpenses]
     .filter((e) => !e.isSettlement)
