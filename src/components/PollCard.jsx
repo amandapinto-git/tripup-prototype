@@ -134,13 +134,15 @@ export default function PollCard({ tripId, poll, members, onConfirmed, onOpenDet
             width: '100%',
           }}
         >
-          {showScheduledTime && <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
-          <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
-          {creator && (
-            <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>
-              Created by {creator.id === YOU_ID ? 'you' : creator.name}
-            </p>
-          )}
+          {showScheduledTime && <p style={{ margin: '0 0 2px', fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
+            {creator && (
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>
+                Created by {creator.id === YOU_ID ? 'you' : creator.name}
+              </p>
+            )}
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {poll.options.map((opt) => {
@@ -199,13 +201,15 @@ export default function PollCard({ tripId, poll, members, onConfirmed, onOpenDet
     >
       <div className="row-between" style={{ alignItems: 'flex-start' }}>
         <div>
-          {showScheduledTime && <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
-          <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
-          {creator && (
-            <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>
-              Created by {creator.id === YOU_ID ? 'you' : creator.name}
-            </p>
-          )}
+          {showScheduledTime && <p style={{ margin: '0 0 2px', fontSize: 12, color: 'var(--ink-mute)' }}>{poll.time}</p>}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <p style={{ margin: 0, fontWeight: 600, fontSize: 18 }}>{poll.title}</p>
+            {creator && (
+              <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>
+                Created by {creator.id === YOU_ID ? 'you' : creator.name}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

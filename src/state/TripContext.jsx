@@ -28,29 +28,27 @@ function insertByTime(items, item) {
 // from an earlier prototype iteration can't crash the app on load.
 const STORAGE_KEY = 'tripup-state-v16';
 
-// The "Dinner Restaurant Tokyo" poll is a scripted demo (see
-// PollCloseDemo.jsx): it's meant to always start "in progress" on a fresh
-// load and re-run its close→confirm cycle every time, not persist whatever
-// state a previous run left it in.
-const DEMO_POLL_ID = 'poll-1';
+// Every poll resets to its seed state on load, not just the one scripted
+// demo poll (see PollCloseDemo.jsx) — any poll created live during a demo
+// session (votes cast, confirmed, discarded, or added from scratch via
+// AddPlanFlow) shouldn't pile up in localStorage and clutter the next run.
+// A poll that exists in seed data comes back fresh; one that doesn't
+// (created live) simply disappears.
+function resetPolls(trips) {
+  return trips.map((trip) => {
+    const seedTrip = seedTrips.find((t) => t.id === trip.id);
+    if (!seedTrip) return trip;
 
-function resetDemoPoll(trips) {
-  const seedDay = seedTrips.flatMap((t) => t.itinerary).find((d) => d.items.some((i) => i.id === DEMO_POLL_ID));
-  const seedItem = seedDay?.items.find((i) => i.id === DEMO_POLL_ID);
-  if (!seedItem) return trips;
-
-  return trips.map((trip) => ({
-    ...trip,
-    itinerary: trip.itinerary.map((day) => {
-      // Strip any stale copy first (e.g. left over from a previous demo run
-      // that discarded/confirmed it), then re-insert it fresh into the day
-      // it belongs in — a plain .map() can't resurrect an item a prior
-      // DISCARD_POLL filtered out of the array entirely.
-      const withoutDemo = day.items.filter((item) => item.id !== DEMO_POLL_ID);
-      if (day.date !== seedDay.date) return { ...day, items: withoutDemo };
-      return { ...day, items: [...withoutDemo, { ...seedItem }] };
-    }),
-  }));
+    return {
+      ...trip,
+      itinerary: trip.itinerary.map((day) => {
+        const seedDay = seedTrip.itinerary.find((d) => d.date === day.date);
+        const seedPolls = (seedDay?.items || []).filter((i) => i.type === 'poll').map((i) => ({ ...i }));
+        const nonPollItems = day.items.filter((item) => item.type !== 'poll');
+        return { ...day, items: [...nonPollItems, ...seedPolls] };
+      }),
+    };
+  });
 }
 
 // Expenses (and settlements) added during a demo session shouldn't pile up
@@ -68,7 +66,7 @@ function loadInitial() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...parsed, trips: resetExpenses(resetDemoPoll(parsed.trips)) };
+      return { ...parsed, trips: resetExpenses(resetPolls(parsed.trips)) };
     }
   } catch {
     // ignore corrupted storage
