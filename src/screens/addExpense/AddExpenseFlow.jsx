@@ -621,7 +621,7 @@ function ItemAssignStep({ trip, draft, setDraft, onConfirm }) {
 
   return (
     <>
-      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 32, paddingBottom: 32 }}>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 48, paddingBottom: 32 }}>
         <div>
           <FieldLabel>Scanned from</FieldLabel>
           <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 600 }}>{draft.description}</p>
