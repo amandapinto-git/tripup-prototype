@@ -242,6 +242,8 @@ export default function ItineraryBody({ trip }) {
       <ItemDetailDrawer
         key={detailItem?.id}
         item={detailItem}
+        expense={detailItem && trip.expenses.find((e) => e.itineraryItemId === detailItem.id)}
+        members={trip.members}
         onClose={() => setDetailItem(null)}
         onGetDirections={() => {
           setMapsPlace(detailItem.location || detailItem.title);
@@ -250,6 +252,10 @@ export default function ItineraryBody({ trip }) {
         onCancelItem={() => {
           dispatch({ type: 'REMOVE_ITINERARY_ITEM', tripId: trip.id, itemId: detailItem.id });
           setDetailItem(null);
+        }}
+        onViewExpense={() => {
+          setDetailItem(null);
+          navigate(`/trip/${trip.id}?tab=expenses`);
         }}
       />
       {decideOpen && (

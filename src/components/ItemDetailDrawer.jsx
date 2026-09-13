@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
-import { X, NavigationArrow } from '@phosphor-icons/react';
+import { X, NavigationArrow, CaretRight } from '@phosphor-icons/react';
 import { fetchLocationFacts } from '../utils/facts';
+import { formatMoney } from '../utils/balances';
+import { YOU_ID } from '../data/seed';
 
-export default function ItemDetailDrawer({ item, onClose, onGetDirections, onCancelItem }) {
+export default function ItemDetailDrawer({ item, expense, members, onClose, onGetDirections, onCancelItem, onViewExpense }) {
   // undefined = not fetched yet (or still in flight), null = fetched but
   // nothing found, object = a result — distinguishing the first two lets
   // "loading" be derived instead of tracked as its own bit of state.
@@ -98,6 +100,32 @@ export default function ItemDetailDrawer({ item, onClose, onGetDirections, onCan
               </p>
             </div>
             <NavigationArrow size={16} weight="fill" style={{ flexShrink: 0, transform: 'rotate(90deg)' }} />
+          </button>
+        )}
+
+        {expense && (
+          <button className="list-row" style={{ width: '100%', textAlign: 'left', marginBottom: 16 }} onClick={onViewExpense}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center', minWidth: 0 }}>
+              <div style={{ minWidth: 0 }}>
+                <p style={{ margin: 0, fontSize: 12, color: 'var(--ink-mute)' }}>Expense logged</p>
+                <p
+                  style={{
+                    margin: '2px 0 0',
+                    fontSize: 14,
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {(members?.find((m) => m.id === expense.paidBy)?.id === YOU_ID
+                    ? 'You'
+                    : members?.find((m) => m.id === expense.paidBy)?.name) || 'Someone'}{' '}
+                  paid {formatMoney(expense.amount)}
+                </p>
+              </div>
+            </div>
+            <CaretRight size={16} weight="bold" style={{ flexShrink: 0, color: 'var(--ink-mute)' }} />
           </button>
         )}
 
