@@ -41,6 +41,10 @@ export default function PhoneShell({ children }) {
       <div className="phone" ref={phoneRef}>
         <div className="phone-canvas">{children}</div>
       </div>
+      <p className="desktop-note">
+        <span>For the best experience, open this on your phone and add it to your home screen as an app.</span>
+        <span>Viewing on a desktop browser? Hide the toolbar and bookmarks bar for the right sizing.</span>
+      </p>
     </div>
   );
 }

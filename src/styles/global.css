@@ -161,12 +161,31 @@ img {
   flex-direction: column;
 }
 
+/* Below the desktop-mockup breakpoint the app fills a real phone's own
+   screen, so this note would just be clutter — it only exists to explain
+   the mockup frame, which itself only exists on larger screens. */
+.desktop-note {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+  max-width: 360px;
+  font-size: 12px;
+  color: rgba(11, 11, 12, 0.55);
+}
+
 @media (min-width: 640px) {
   .app-shell {
     padding: 32px 16px;
     background: #e7e9eb;
+    flex-direction: column;
+    gap: 16px;
   }
 
+  /* Reserved vertical budget: 32px top/bottom app-shell padding (64px) plus
+     room for .desktop-note below the frame — kept in the same formula as
+     .phone's height so the two never fight over the viewport. */
   .phone {
     /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport.
        Width is derived from the same height formula via calc() rather than
@@ -176,12 +195,17 @@ img {
        every engine, and a squashed frame here is exactly what silently
        overflowed .phone-canvas past the bottom edge and clipped anything
        sticky to it. calc() has no such ambiguity. */
-    height: min(844px, calc(100vh - 64px));
-    width: min(calc((100vh - 64px) * 390 / 844), 390px);
+    height: min(844px, calc(100vh - 150px));
+    width: min(calc((100vh - 150px) * 390 / 844), 390px);
     max-width: 100%;
     border-radius: 55px;
     border: 8px solid #0b0b0c;
     box-shadow: var(--shadow-pop);
+    flex-shrink: 0;
+  }
+
+  .desktop-note {
+    display: flex;
   }
 
   .phone-canvas {
