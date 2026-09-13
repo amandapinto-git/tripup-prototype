@@ -182,6 +182,13 @@ img {
     background: #e7e9eb;
     flex-direction: column;
     gap: 10px;
+    /* "safe" falls back to start-alignment instead of centering whenever
+       centering would overflow the viewport — on a short window this
+       keeps the phone's top edge (status bar, header) anchored in view
+       rather than centering the block and letting the overflow hide half
+       off the top and half off the bottom equally. */
+    justify-content: safe center;
+    overflow-y: auto;
     /* Reserved vertical budget: 32px top/bottom app-shell padding (64px)
        plus room for .desktop-note below the frame — kept in one formula so
        .phone's height and .desktop-note's width (below) both derive from
