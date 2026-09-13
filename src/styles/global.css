@@ -168,10 +168,16 @@ img {
   }
 
   .phone {
-    /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport */
-    aspect-ratio: 390 / 844;
+    /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport.
+       Width is derived from the same height formula via calc() rather than
+       left to `aspect-ratio` + flex auto-sizing — as a flex item sized
+       against a child (.phone-canvas) that carries its own fixed 390x844
+       box, aspect-ratio alone doesn't reliably drive the auto width in
+       every engine, and a squashed frame here is exactly what silently
+       overflowed .phone-canvas past the bottom edge and clipped anything
+       sticky to it. calc() has no such ambiguity. */
     height: min(844px, calc(100vh - 64px));
-    width: auto;
+    width: min(calc((100vh - 64px) * 390 / 844), 390px);
     max-width: 100%;
     border-radius: 55px;
     border: 8px solid #0b0b0c;

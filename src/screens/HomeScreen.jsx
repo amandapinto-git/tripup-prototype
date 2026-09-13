@@ -25,7 +25,11 @@ function findOpenPolls(trip) {
   const polls = [];
   for (const day of trip.itinerary) {
     for (const item of day.items) {
-      if (item.type === 'poll' && !item.decided) {
+      // Once a poll has actually closed, voting is no longer possible —
+      // it needs a confirmation (see findPendingConfirmations below), not
+      // a vote, so it drops out of "Need Your Input" even if this member
+      // never got a vote in.
+      if (item.type === 'poll' && !item.decided && !isPollClosed(item, trip.members)) {
         const youVoted = item.options.some((o) => o.votes.includes(YOU_ID));
         if (!youVoted) polls.push({ trip, day, item });
       }
@@ -34,14 +38,15 @@ function findOpenPolls(trip) {
   return polls;
 }
 
-// Closed, unconfirmed, and created by the current user — these are the
-// polls only they can act on, so they get their own notification-style
-// section rather than being folded into "Need Your Input".
+// Closed and unconfirmed — either the poll's creator or the trip organiser
+// can confirm it (see PollCard), and "you" are always the organiser in
+// this single-user prototype, so any closed poll lands here rather than
+// only ones this member happened to create.
 function findPendingConfirmations(trip) {
   const polls = [];
   for (const day of trip.itinerary) {
     for (const item of day.items) {
-      if (item.type === 'poll' && !item.decided && item.createdBy === YOU_ID && isPollClosed(item, trip.members)) {
+      if (item.type === 'poll' && !item.decided && isPollClosed(item, trip.members)) {
         polls.push({ trip, day, item });
       }
     }

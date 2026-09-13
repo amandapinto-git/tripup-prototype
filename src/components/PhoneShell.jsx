@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 
 const DESIGN_WIDTH = 390;
+const DESIGN_HEIGHT = 844;
 
 export default function PhoneShell({ children }) {
   const phoneRef = useRef(null);
@@ -16,7 +17,12 @@ export default function PhoneShell({ children }) {
         el.style.removeProperty('--phone-scale');
         return;
       }
-      const scale = el.clientWidth / DESIGN_WIDTH;
+      // Whichever axis is actually the tighter constraint on this viewport
+      // (a tall narrow window caps width, a short wide one like a laptop
+      // caps height instead) — using width alone left the canvas unscaled
+      // whenever height was the real limit, overflowing the clipped frame
+      // and cutting off anything sticky to its bottom edge.
+      const scale = Math.min(el.clientWidth / DESIGN_WIDTH, el.clientHeight / DESIGN_HEIGHT);
       el.style.setProperty('--phone-scale', String(scale));
     };
 
