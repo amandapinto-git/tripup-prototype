@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   CaretLeft,
   Camera,
@@ -12,7 +13,23 @@ import CategoryPicker from '../../components/CategoryPicker';
 import FieldLabel from '../../components/FieldLabel';
 import UnderlineField, { underlineInputStyle } from '../../components/UnderlineField';
 import PillToggle from '../../components/PillToggle';
+import MemberChipRow from '../../components/MemberChipRow';
+import { formatMoney } from '../../utils/balances';
 import { YOU_ID } from '../../data/seed';
+
+// The fake bill a "Scan a bill" tap pretends to read — a real integration
+// would OCR an actual photo, but for this prototype the point is the
+// assignment flow that follows, not OCR itself.
+const SCANNED_BILL = {
+  vendor: 'Cervejaria Ramiro',
+  items: [
+    { id: 'si-1', name: 'Grilled Prawns', price: 28 },
+    { id: 'si-2', name: 'Percebes (Goose Barnacles)', price: 22 },
+    { id: 'si-3', name: 'Bread & Olives', price: 6 },
+    { id: 'si-4', name: 'House Wine, Bottle', price: 32 },
+    { id: 'si-5', name: 'Sparkling Water x2', price: 6 },
+  ],
+};
 
 // An itinerary item's own type already implies an expense category, so a
 // linked expense never needs to ask for one separately.
@@ -29,16 +46,17 @@ export default function AddExpenseFlow() {
   // the in-flow MethodStep below only matters for a direct/bookmarked URL.
   const method = params.get('method');
 
-  const [step, setStep] = useState(method === 'scan' ? 2 : method === 'manual' ? 1 : 0);
+  const [step, setStep] = useState(method === 'scan' ? 'scanning' : method === 'manual' ? 1 : 0);
   const [draft, setDraft] = useState({
-    description: method === 'scan' ? 'Oysho Restaurant Tokyo' : '',
-    amount: method === 'scan' ? '86' : '',
+    description: '',
+    amount: '',
     category: 'food',
     itineraryItemId: null,
     paidBy: YOU_ID,
     splitType: 'equal',
     splitWith: trip ? trip.members.map((m) => m.id) : [],
     customSplit: {},
+    scanItems: null,
   });
 
   const itineraryItems = useMemo(
@@ -56,27 +74,48 @@ export default function AddExpenseFlow() {
 
   const goBack = () => {
     if (step === 0) navigate(`/trip/${tripId}?tab=expenses`);
+    else if (step === 'scanning') setStep(0);
+    else if (step === 'assign') setStep('scanning');
     else setStep((s) => s - 1);
   };
 
   const linkedItem = itineraryItems.find((i) => i.id === draft.itineraryItemId);
 
   const finish = () => {
+    const isScan = Boolean(draft.scanItems);
+    let amount = Number(draft.amount) || 0;
+    let customSplit;
+    let splitWith = draft.splitWith;
+
+    if (isScan) {
+      const sums = {};
+      draft.scanItems.forEach((it) => {
+        if (!it.assignedTo.length) return;
+        const share = it.price / it.assignedTo.length;
+        it.assignedTo.forEach((id) => {
+          sums[id] = (sums[id] || 0) + share;
+        });
+      });
+      amount = draft.scanItems.reduce((sum, it) => sum + it.price, 0);
+      customSplit = sums;
+      splitWith = Object.keys(sums);
+    } else if (draft.splitType === 'custom') {
+      customSplit = Object.fromEntries(draft.splitWith.map((id) => [id, Number(draft.customSplit[id]) || 0]));
+    }
+
     dispatch({
       type: 'ADD_EXPENSE',
       tripId,
       expense: {
         id: `ex-${Date.now()}`,
         description: linkedItem?.title || draft.description || 'Untitled expense',
-        amount: Number(draft.amount) || 0,
+        amount,
         category: draft.category,
         paidBy: draft.paidBy,
-        splitType: draft.splitType,
-        splitWith: draft.splitWith,
-        customSplit:
-          draft.splitType === 'custom'
-            ? Object.fromEntries(draft.splitWith.map((id) => [id, Number(draft.customSplit[id]) || 0]))
-            : undefined,
+        splitType: isScan ? 'custom' : draft.splitType,
+        splitWith,
+        customSplit,
+        items: isScan ? draft.scanItems : undefined,
         date: new Date().toISOString(),
         itineraryItemId: draft.itineraryItemId,
       },
@@ -96,13 +135,23 @@ export default function AddExpenseFlow() {
 
       <div className="fade-route" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {step === 0 && (
-          <MethodStep
-            onManual={() => setStep(1)}
-            onScan={() => {
-              setDraft((d) => ({ ...d, description: 'Oysho Restaurant Tokyo', amount: '86', category: 'food' }));
-              setStep(2);
+          <MethodStep onManual={() => setStep(1)} onScan={() => setStep('scanning')} />
+        )}
+        {step === 'scanning' && (
+          <ScanningStep
+            onDone={() => {
+              setDraft((d) => ({
+                ...d,
+                description: SCANNED_BILL.vendor,
+                category: 'food',
+                scanItems: SCANNED_BILL.items.map((it) => ({ ...it, assignedTo: trip.members.map((m) => m.id) })),
+              }));
+              setStep('assign');
             }}
           />
+        )}
+        {step === 'assign' && (
+          <ItemAssignStep trip={trip} draft={draft} setDraft={setDraft} onConfirm={finish} />
         )}
         {step === 1 && (
           <LinkStep
@@ -299,32 +348,7 @@ function PaidByField({ trip, value, onChange }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <FieldLabel>Paid by</FieldLabel>
-      <div style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
-        {trip.members.map((m) => {
-          const selected = value === m.id;
-          return (
-            <button
-              key={m.id}
-              onClick={() => onChange(m.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                flexShrink: 0,
-                padding: '6px 14px 6px 6px',
-                borderRadius: 999,
-                background: selected ? '#000' : 'transparent',
-                border: `1px solid ${selected ? '#000' : 'var(--border)'}`,
-              }}
-            >
-              <Avatar member={m} size={26} />
-              <span style={{ fontSize: 14, fontWeight: 600, color: selected ? '#fff' : 'var(--ink)', whiteSpace: 'nowrap' }}>
-                {m.id === YOU_ID ? 'You' : m.name}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      <MemberChipRow members={trip.members} selectedIds={[value]} onToggle={onChange} />
     </div>
   );
 }
@@ -478,6 +502,148 @@ function LinkedDetailsStep({ linkedItem, trip, draft, setDraft, onConfirm }) {
           </div>
         </UnderlineField>
         <SplitFields trip={trip} draft={draft} setDraft={setDraft} />
+      </div>
+      <div className="bottom-bar">
+        <button className="btn btn-primary" disabled={!canConfirm} onClick={onConfirm}>
+          Confirm & Add
+        </button>
+      </div>
+    </>
+  );
+}
+
+// A believable "reading the receipt" pause before the fake OCR result
+// lands — the fixed delay stands in for the real scan a proper OCR
+// integration would run.
+function ScanningStep({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 1800);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div className="screen-pad" style={{ paddingTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
+      <div
+        style={{
+          position: 'relative',
+          width: 220,
+          padding: 20,
+          background: '#fff',
+          borderRadius: 12,
+          border: '1px solid var(--border-soft)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ height: 10, width: '55%', margin: '0 auto 6px', background: 'rgba(0,0,0,0.1)', borderRadius: 4 }} />
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              style={{
+                height: 8,
+                width: i % 3 === 0 ? '85%' : '65%',
+                background: 'rgba(0,0,0,0.07)',
+                borderRadius: 4,
+              }}
+            />
+          ))}
+        </div>
+        <motion.div
+          initial={{ top: 0 }}
+          animate={{ top: '100%' }}
+          transition={{ duration: 1.6, ease: 'linear' }}
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            height: 3,
+            background: '#000',
+            boxShadow: '0 0 14px 2px rgba(0,0,0,0.4)',
+          }}
+        />
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <p style={{ margin: 0, fontWeight: 600, fontSize: 16 }}>Scanning receipt…</p>
+        <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--ink-mute)' }}>Pulling out items and prices</p>
+      </div>
+    </div>
+  );
+}
+
+// Assigning each line item to whoever actually had it (rather than one
+// flat split for the whole bill) is what makes "wine only for the two
+// people who drank it, food for everyone" a single expense instead of two.
+function ItemAssignStep({ trip, draft, setDraft, onConfirm }) {
+  const items = useMemo(() => draft.scanItems || [], [draft.scanItems]);
+
+  const toggleItemMember = (itemId, memberId) => {
+    setDraft((d) => ({
+      ...d,
+      scanItems: d.scanItems.map((it) =>
+        it.id === itemId
+          ? {
+              ...it,
+              assignedTo: it.assignedTo.includes(memberId)
+                ? it.assignedTo.filter((id) => id !== memberId)
+                : [...it.assignedTo, memberId],
+            }
+          : it
+      ),
+    }));
+  };
+
+  const totals = useMemo(() => {
+    const sums = Object.fromEntries(trip.members.map((m) => [m.id, 0]));
+    items.forEach((it) => {
+      if (!it.assignedTo.length) return;
+      const share = it.price / it.assignedTo.length;
+      it.assignedTo.forEach((id) => {
+        sums[id] += share;
+      });
+    });
+    return sums;
+  }, [items, trip.members]);
+
+  const billTotal = items.reduce((sum, it) => sum + it.price, 0);
+  const canConfirm = items.length > 0 && items.every((it) => it.assignedTo.length > 0);
+
+  return (
+    <>
+      <div className="screen-pad" style={{ paddingTop: 32, display: 'flex', flexDirection: 'column', gap: 32, paddingBottom: 32 }}>
+        <div>
+          <FieldLabel>Scanned from</FieldLabel>
+          <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 600 }}>{draft.description}</p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <FieldLabel>Who had this?</FieldLabel>
+          {items.map((it) => (
+            <div key={it.id} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div className="row-between">
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{it.name}</span>
+                <span style={{ fontSize: 14, fontWeight: 600 }}>{formatMoney(it.price)}</span>
+              </div>
+              <MemberChipRow members={trip.members} selectedIds={it.assignedTo} onToggle={(id) => toggleItemMember(it.id, id)} />
+            </div>
+          ))}
+        </div>
+
+        <PaidByField trip={trip} value={draft.paidBy} onChange={(id) => setDraft((d) => ({ ...d, paidBy: id }))} />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <FieldLabel>Split summary</FieldLabel>
+          {trip.members.filter((m) => totals[m.id] > 0).map((m) => (
+            <div key={m.id} className="row-between">
+              <span style={{ fontSize: 14 }}>{m.id === YOU_ID ? 'You' : m.name}</span>
+              <span style={{ fontSize: 14, fontWeight: 600 }}>{formatMoney(totals[m.id])}</span>
+            </div>
+          ))}
+          <div className="row-between" style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: 10, marginTop: 2 }}>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>Total</span>
+            <span style={{ fontSize: 14, fontWeight: 600 }}>{formatMoney(billTotal)}</span>
+          </div>
+        </div>
       </div>
       <div className="bottom-bar">
         <button className="btn btn-primary" disabled={!canConfirm} onClick={onConfirm}>
