@@ -593,6 +593,17 @@ function ItemAssignStep({ trip, draft, setDraft, onConfirm }) {
     }));
   };
 
+  const toggleAllForItem = (itemId) => {
+    setDraft((d) => ({
+      ...d,
+      scanItems: d.scanItems.map((it) => {
+        if (it.id !== itemId) return it;
+        const allSelected = trip.members.every((m) => it.assignedTo.includes(m.id));
+        return { ...it, assignedTo: allSelected ? [] : trip.members.map((m) => m.id) };
+      }),
+    }));
+  };
+
   const totals = useMemo(() => {
     const sums = Object.fromEntries(trip.members.map((m) => [m.id, 0]));
     items.forEach((it) => {
@@ -624,7 +635,12 @@ function ItemAssignStep({ trip, draft, setDraft, onConfirm }) {
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{it.name}</span>
                 <span style={{ fontSize: 14, fontWeight: 600 }}>{formatMoney(it.price)}</span>
               </div>
-              <MemberChipRow members={trip.members} selectedIds={it.assignedTo} onToggle={(id) => toggleItemMember(it.id, id)} />
+              <MemberChipRow
+                members={trip.members}
+                selectedIds={it.assignedTo}
+                onToggle={(id) => toggleItemMember(it.id, id)}
+                onToggleAll={() => toggleAllForItem(it.id)}
+              />
             </div>
           ))}
         </div>
