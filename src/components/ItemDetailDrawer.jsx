@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { X, NavigationArrow } from '@phosphor-icons/react';
 import { fetchLocationFacts } from '../utils/facts';
 
-export default function ItemDetailDrawer({ item, onClose, onGetDirections }) {
+export default function ItemDetailDrawer({ item, onClose, onGetDirections, onCancelItem }) {
   // undefined = not fetched yet (or still in flight), null = fetched but
   // nothing found, object = a result — distinguishing the first two lets
   // "loading" be derived instead of tracked as its own bit of state.
@@ -100,6 +100,10 @@ export default function ItemDetailDrawer({ item, onClose, onGetDirections }) {
             <NavigationArrow size={16} weight="fill" style={{ flexShrink: 0, transform: 'rotate(90deg)' }} />
           </button>
         )}
+
+        <button className="btn btn-outline" style={{ color: 'var(--danger)' }} onClick={onCancelItem}>
+          Cancel item
+        </button>
       </div>
     </div>
   );

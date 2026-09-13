@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { CaretLeft, Plus, UserSwitch, PencilSimpleLine, X, Clock } from '@phosphor-icons/react';
+import { CaretLeft, Plus, UserSwitch, PencilSimpleLine, X, Clock, Check } from '@phosphor-icons/react';
 import { useTrip, useTripDispatch } from '../../state/TripContext';
 import CategoryPicker from '../../components/CategoryPicker';
 import FieldLabel from '../../components/FieldLabel';
@@ -191,10 +191,7 @@ function KnownForm({ item, setItem, onSubmit, date, setDate, trip }) {
           <CategoryPicker selected={item.category} onChange={(key) => setItem((d) => ({ ...d, category: key }))} />
         </div>
         <DateField value={date} onChange={setDate} min={trip.start} max={trip.end} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <FieldLabel>Time</FieldLabel>
-          <TimePickerField value={item.time} onChange={(v) => setItem((d) => ({ ...d, time: v }))} />
-        </div>
+        <TimeField value={item.time} onChange={(v) => setItem((d) => ({ ...d, time: v }))} />
       </div>
       <div className="bottom-bar">
         <button className="btn btn-primary" disabled={!item.title.trim()} onClick={onSubmit}>
@@ -275,7 +272,11 @@ function PollForm({ poll, setPoll, onSubmit, date, setDate, trip }) {
           />
 
           {poll.timeMode === 'manual' ? (
-            <TimePickerField value={poll.timeManual} onChange={(v) => setPoll((d) => ({ ...d, timeManual: v }))} />
+            <TimeField
+              showLabel={false}
+              value={poll.timeManual}
+              onChange={(v) => setPoll((d) => ({ ...d, timeManual: v }))}
+            />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {poll.timeOptions.map((t, i) => (
@@ -361,6 +362,40 @@ function DateField({ value, onChange, min, max }) {
         />
       </div>
     </UnderlineField>
+  );
+}
+
+const ALL_DAY = 'All day';
+
+// Wraps TimePickerField with an "All day" pill — picking it swaps in a
+// fixed sentinel value instead of a clock time, and hides the time input
+// since there's nothing to pick anymore.
+function TimeField({ value, onChange, showLabel = true, placeholder }) {
+  const isAllDay = value === ALL_DAY;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="row-between">
+        {showLabel ? <FieldLabel>Time</FieldLabel> : <span />}
+        <button
+          onClick={() => onChange(isAllDay ? '' : ALL_DAY)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            fontSize: 13,
+            fontWeight: 600,
+            color: isAllDay ? '#fff' : 'var(--ink-soft)',
+            background: isAllDay ? '#000' : 'transparent',
+            border: `1px solid ${isAllDay ? '#000' : 'var(--border)'}`,
+            borderRadius: 999,
+            padding: '5px 12px',
+          }}
+        >
+          {isAllDay && <Check size={12} weight="bold" />} All day
+        </button>
+      </div>
+      {!isAllDay && <TimePickerField value={value} onChange={onChange} placeholder={placeholder} />}
+    </div>
   );
 }
 

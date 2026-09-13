@@ -154,6 +154,22 @@ function reducer(state, action) {
         }),
       };
     }
+    case 'REMOVE_ITINERARY_ITEM': {
+      const { tripId, itemId } = action;
+      return {
+        ...state,
+        trips: state.trips.map((trip) => {
+          if (trip.id !== tripId) return trip;
+          return {
+            ...trip,
+            itinerary: trip.itinerary.map((day) => ({
+              ...day,
+              items: day.items.filter((item) => item.id !== itemId),
+            })),
+          };
+        }),
+      };
+    }
     case 'MARK_POLL_CLOSED': {
       // Simulates the poll's own closing rule firing (e.g. the scheduled
       // time passing) — independent of whether every member has voted, so

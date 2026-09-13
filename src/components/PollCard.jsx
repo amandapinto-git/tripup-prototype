@@ -59,7 +59,7 @@ function OptionField({ opt, pct, filled, onClick, right }) {
 // is still up for a vote or was never set.
 const PLACEHOLDER_TIMES = ['Time TBD', 'Time: vote in progress'];
 
-export default function PollCard({ tripId, poll, members, onOpenMaps, onConfirmed }) {
+export default function PollCard({ tripId, poll, members, onConfirmed, onOpenDetail }) {
   const dispatch = useTripDispatch();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const totalVotes = poll.options.reduce((sum, o) => sum + o.votes.length, 0);
@@ -78,7 +78,14 @@ export default function PollCard({ tripId, poll, members, onOpenMaps, onConfirme
     return (
       <button
         className="card"
-        onClick={() => onOpenMaps?.(poll.confirmedLocation?.address || placeName)}
+        onClick={() =>
+          onOpenDetail?.({
+            id: poll.id,
+            title: placeName,
+            time,
+            location: poll.confirmedLocation?.address,
+          })
+        }
         style={{
           width: '100%',
           textAlign: 'left',

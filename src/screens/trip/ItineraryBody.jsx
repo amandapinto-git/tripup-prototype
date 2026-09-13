@@ -7,6 +7,7 @@ import AirlineLogo from '../../components/AirlineLogo';
 import AddPlanDecideDrawer from '../../components/AddPlanDecideDrawer';
 import ItemDetailDrawer from '../../components/ItemDetailDrawer';
 import { estimateTransit } from '../../utils/transit';
+import { useTripDispatch } from '../../state/TripContext';
 
 const ICONS = {
   hotel: Bed,
@@ -45,6 +46,7 @@ function dateRange(start, end) {
 
 export default function ItineraryBody({ trip }) {
   const navigate = useNavigate();
+  const dispatch = useTripDispatch();
   const [params] = useSearchParams();
   const allDays = dateRange(trip.start, trip.end);
   const requestedDay = params.get('day');
@@ -149,7 +151,9 @@ export default function ItineraryBody({ trip }) {
               const transitLineStyle = '#000';
 
               const nextItem = day.items[i + 1];
-              const showTransit = !isLast && item.type !== 'poll';
+              // A poll's real location isn't known until it's decided — no
+              // meaningful distance/time can be estimated to or from one.
+              const showTransit = !isLast && item.type !== 'poll' && nextItem.type !== 'poll';
               const origin = showTransit ? locationLabel(item, 'origin') : null;
               const destination = showTransit ? locationLabel(nextItem, 'destination') : null;
 
@@ -166,7 +170,7 @@ export default function ItineraryBody({ trip }) {
                         tripId={trip.id}
                         poll={item}
                         members={trip.members}
-                        onOpenMaps={setMapsPlace}
+                        onOpenDetail={setDetailItem}
                         onConfirmed={() => {
                           // The card's height changes once it collapses into
                           // its decided state — re-center on it next frame
@@ -227,6 +231,10 @@ export default function ItineraryBody({ trip }) {
         onClose={() => setDetailItem(null)}
         onGetDirections={() => {
           setMapsPlace(detailItem.location || detailItem.title);
+          setDetailItem(null);
+        }}
+        onCancelItem={() => {
+          dispatch({ type: 'REMOVE_ITINERARY_ITEM', tripId: trip.id, itemId: detailItem.id });
           setDetailItem(null);
         }}
       />
