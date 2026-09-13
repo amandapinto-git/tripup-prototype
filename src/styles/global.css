@@ -168,10 +168,11 @@ img {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   text-align: center;
-  max-width: 360px;
-  font-size: 12px;
+  max-width: 460px;
+  font-size: 11px;
+  line-height: 1.4;
   color: rgba(11, 11, 12, 0.55);
 }
 
@@ -180,23 +181,33 @@ img {
     padding: 32px 16px;
     background: #e7e9eb;
     flex-direction: column;
-    gap: 16px;
+    gap: 10px;
   }
 
   /* Reserved vertical budget: 32px top/bottom app-shell padding (64px) plus
      room for .desktop-note below the frame — kept in the same formula as
-     .phone's height so the two never fight over the viewport. */
+     .phone's height so the two never fight over the viewport. Every pixel
+     reserved here is a pixel the frame itself doesn't get, so the note is
+     kept as compact as it can be while still fitting both lines. */
   .phone {
     /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport.
-       Width is derived from the same height formula via calc() rather than
-       left to `aspect-ratio` + flex auto-sizing — as a flex item sized
-       against a child (.phone-canvas) that carries its own fixed 390x844
-       box, aspect-ratio alone doesn't reliably drive the auto width in
-       every engine, and a squashed frame here is exactly what silently
-       overflowed .phone-canvas past the bottom edge and clipped anything
-       sticky to it. calc() has no such ambiguity. */
-    height: min(844px, calc(100vh - 150px));
-    width: min(calc((100vh - 150px) * 390 / 844), 390px);
+       This box is border-box (8px border each side), so the ratio has to
+       be maintained on the CONTENT box, not the border-box width/height
+       properties directly — sizing those to a 390:844 ratio left an
+       uneven 16px eaten out of each axis by the border, which distorts a
+       282x610-ish box's ratio a lot more than it does 390x844's, so the
+       canvas (sized off .clientWidth/.clientHeight in PhoneShell.jsx) came
+       up short on whichever axis lost relatively more room to the border —
+       flush at the top (anchored there) but with a gap at the bottom.
+       --phone-content-h is computed once and reused for both width and
+       height so they can't drift apart the way two separate formulas did. */
+    /* Capped well under the true 844pt native size — at full size the
+       frame dominates the page and crowds .desktop-note on anything but a
+       very tall monitor; a smaller cap keeps the mockup feeling like an
+       inset preview and leaves the note consistent breathing room. */
+    --phone-content-h: min(700px, calc(100vh - 126px));
+    height: calc(var(--phone-content-h) + 16px);
+    width: calc(var(--phone-content-h) * 390 / 844 + 16px);
     max-width: 100%;
     border-radius: 55px;
     border: 8px solid #0b0b0c;
@@ -206,6 +217,19 @@ img {
 
   .desktop-note {
     display: flex;
+  }
+
+  /* Floating/sticky CTAs sit flush against .phone-scroll's own bottom edge
+     by design on mobile (the safe-area inset already clears the home
+     indicator there) — but inside the desktop mockup that edge is the
+     rounded bezel corner, not a real device edge, so they need extra
+     clearance to not look like they're crowding it. */
+  .fab-btn {
+    bottom: 32px;
+  }
+
+  .bottom-bar {
+    bottom: 16px;
   }
 
   .phone-canvas {
@@ -474,6 +498,7 @@ img {
   border-radius: var(--radius-pill);
   font-size: 14px;
   font-weight: 600;
+  white-space: nowrap;
   transition: opacity 0.15s ease, transform 0.1s ease;
 }
 

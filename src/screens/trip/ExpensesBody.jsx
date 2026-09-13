@@ -232,16 +232,16 @@ export default function ExpensesBody({ trip }) {
         </div>
       </div>
 
-      <div className="bottom-bar">
+      <div className="bottom-bar" style={{ gap: 8 }}>
         <button
           className="btn btn-outline"
-          style={{ flex: 1 }}
+          style={{ flex: 1, padding: '14px 10px', gap: 6 }}
           onClick={() => youOwe.forEach((s) => handleSettle(s.to, s.amount))}
           disabled={youOwe.length === 0}
         >
           <ArrowsLeftRight size={14} weight="bold" /> Settle all
         </button>
-        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => setMethodOpen(true)}>
+        <button className="btn btn-primary" style={{ flex: 1, padding: '14px 10px', gap: 6 }} onClick={() => setMethodOpen(true)}>
           <Plus size={14} weight="bold" /> Add an expense
         </button>
       </div>

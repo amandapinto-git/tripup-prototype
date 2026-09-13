@@ -51,11 +51,25 @@ export default function ItineraryBody({ trip }) {
   const allDays = dateRange(trip.start, trip.end);
   const requestedDay = params.get('day');
   const requestedItem = params.get('item');
-  const [activeDay, setActiveDay] = useState(requestedDay || trip.itinerary[0]?.date || allDays[0]?.date);
+  // No explicit ?day= (e.g. arriving fresh from the tab bar, not a deep
+  // link) lands on today — trip.currentDate — rather than always the
+  // trip's first day, so opening the itinerary mid-trip doesn't require
+  // scrolling the day carousel back to where things actually stand.
+  const [activeDay, setActiveDay] = useState(
+    requestedDay || trip.currentDate || trip.itinerary[0]?.date || allDays[0]?.date
+  );
   const [mapsPlace, setMapsPlace] = useState(null);
   const [detailItem, setDetailItem] = useState(null);
   const [decideOpen, setDecideOpen] = useState(false);
   const itemRefs = useRef({});
+  const dayTabRefs = useRef({});
+
+  // Defaulting to today (above) means the active tab is often not the
+  // first/visible one — scroll the day carousel so it's actually in view
+  // instead of silently selected off-screen.
+  useEffect(() => {
+    dayTabRefs.current[activeDay]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [activeDay]);
 
   // A notification banner can deep-link here while ItineraryBody is already
   // mounted (same route, just new day/item params) — react-router doesn't
@@ -113,6 +127,9 @@ export default function ItineraryBody({ trip }) {
           return (
             <button
               key={d.date}
+              ref={(el) => {
+                dayTabRefs.current[d.date] = el;
+              }}
               onClick={() => setActiveDay(d.date)}
               style={{
                 flex: '1 0 0',
