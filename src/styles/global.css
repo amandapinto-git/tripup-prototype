@@ -171,9 +171,9 @@ img {
   gap: 1px;
   text-align: center;
   max-width: 460px;
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.4;
-  color: rgba(11, 11, 12, 0.55);
+  color: rgba(11, 11, 12, 0.7);
 }
 
 @media (min-width: 640px) {
@@ -253,6 +253,13 @@ img {
        is exactly what caused content to overflow the right edge. */
     transform: scale(var(--phone-scale, 1));
     transform-origin: top left;
+    /* The notification banner's corners should look concentric with the
+       bezel's own curve rather than an unrelated fixed radius — nested-
+       radius math: bezel's inner curve (outer 40px radius minus its 8px
+       border) minus the banner's 10px inset from the edge, then divided
+       back by the scale since the banner's radius is itself specified in
+       these pre-scale canvas units. */
+    --notif-radius: calc((40px - 8px) / var(--phone-scale, 1) - 10px);
   }
 }
 

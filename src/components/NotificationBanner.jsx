@@ -20,7 +20,7 @@ export default function NotificationBanner({ visible, title, subtitle, onTap, on
         gap: 10,
         textAlign: 'left',
         padding: '12px 14px',
-        borderRadius: 16,
+        borderRadius: 'var(--notif-radius, 16px)',
         background: 'rgba(255, 255, 255, 0.68)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
@@ -36,9 +36,9 @@ export default function NotificationBanner({ visible, title, subtitle, onTap, on
     >
       <span
         style={{
-          width: 30,
-          height: 30,
-          borderRadius: 8,
+          width: 44,
+          height: 44,
+          borderRadius: 12,
           background: '#000',
           display: 'flex',
           alignItems: 'center',
@@ -46,7 +46,7 @@ export default function NotificationBanner({ visible, title, subtitle, onTap, on
           flexShrink: 0,
         }}
       >
-        <Bell size={16} weight="fill" color="#fff" />
+        <Bell size={24} weight="fill" color="#fff" />
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{title}</p>
