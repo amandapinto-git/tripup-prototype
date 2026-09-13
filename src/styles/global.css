@@ -182,13 +182,19 @@ img {
     background: #e7e9eb;
     flex-direction: column;
     gap: 10px;
+    /* Reserved vertical budget: 32px top/bottom app-shell padding (64px)
+       plus room for .desktop-note below the frame — kept in one formula so
+       .phone's height and .desktop-note's width (below) both derive from
+       it and can never drift apart. Every pixel reserved here is a pixel
+       the frame itself doesn't get, so the note is kept as compact as it
+       can be while still fitting both lines.
+       Capped well under the true 844pt native size — at full size the
+       frame dominates the page and crowds the note on anything but a very
+       tall monitor; a smaller cap keeps the mockup feeling like an inset
+       preview and leaves the note consistent breathing room. */
+    --phone-content-h: min(700px, calc(100vh - 126px));
   }
 
-  /* Reserved vertical budget: 32px top/bottom app-shell padding (64px) plus
-     room for .desktop-note below the frame — kept in the same formula as
-     .phone's height so the two never fight over the viewport. Every pixel
-     reserved here is a pixel the frame itself doesn't get, so the note is
-     kept as compact as it can be while still fitting both lines. */
   .phone {
     /* iPhone 14 aspect ratio: 390 x 844pt @ 1x, capped to fit the viewport.
        This box is border-box (8px border each side), so the ratio has to
@@ -198,14 +204,7 @@ img {
        282x610-ish box's ratio a lot more than it does 390x844's, so the
        canvas (sized off .clientWidth/.clientHeight in PhoneShell.jsx) came
        up short on whichever axis lost relatively more room to the border —
-       flush at the top (anchored there) but with a gap at the bottom.
-       --phone-content-h is computed once and reused for both width and
-       height so they can't drift apart the way two separate formulas did. */
-    /* Capped well under the true 844pt native size — at full size the
-       frame dominates the page and crowds .desktop-note on anything but a
-       very tall monitor; a smaller cap keeps the mockup feeling like an
-       inset preview and leaves the note consistent breathing room. */
-    --phone-content-h: min(700px, calc(100vh - 126px));
+       flush at the top (anchored there) but with a gap at the bottom. */
     height: calc(var(--phone-content-h) + 16px);
     width: calc(var(--phone-content-h) * 390 / 844 + 16px);
     max-width: 100%;
@@ -217,6 +216,10 @@ img {
 
   .desktop-note {
     display: flex;
+    /* Same formula as .phone's own width so the note lines up with the
+       frame above it exactly, instead of its own independent max-width. */
+    width: calc(var(--phone-content-h) * 390 / 844 + 16px);
+    max-width: 100%;
   }
 
   /* Floating/sticky CTAs sit flush against .phone-scroll's own bottom edge
