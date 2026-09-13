@@ -199,7 +199,7 @@ img {
        frame dominates the page and crowds the note on anything but a very
        tall monitor; a smaller cap keeps the mockup feeling like an inset
        preview and leaves the note consistent breathing room. */
-    --phone-content-h: min(700px, calc(100vh - 126px));
+    --phone-content-h: min(700px, calc(100vh - 152px));
   }
 
   .phone {

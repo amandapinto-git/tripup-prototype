@@ -43,7 +43,7 @@ export default function PhoneShell({ children }) {
       </div>
       <p className="desktop-note">
         <span>For the best experience, open this on your phone and add it to your home screen as an app.</span>
-        <span>Viewing on a desktop browser? Hide the toolbar and bookmarks bar for the right sizing.</span>
+        <span>Viewing on a desktop browser? Put your tab in full screen and hide the toolbar and bookmarks bar for the right sizing.</span>
       </p>
     </div>
   );
