@@ -35,6 +35,7 @@ export default function AddExpenseFlow() {
     amount: method === 'scan' ? '86' : '',
     category: 'food',
     itineraryItemId: null,
+    paidBy: YOU_ID,
     splitType: 'equal',
     splitWith: trip ? trip.members.map((m) => m.id) : [],
     customSplit: {},
@@ -69,7 +70,7 @@ export default function AddExpenseFlow() {
         description: linkedItem?.title || draft.description || 'Untitled expense',
         amount: Number(draft.amount) || 0,
         category: draft.category,
-        paidBy: YOU_ID,
+        paidBy: draft.paidBy,
         splitType: draft.splitType,
         splitWith: draft.splitWith,
         customSplit:
@@ -290,6 +291,44 @@ function DetailsStep({ draft, setDraft, onNext }) {
   );
 }
 
+// Who actually fronted the money — separate from who owes a share of it.
+// Defaults to "you" since that's who's filling out the form, but any
+// itineraryItemId member can be picked instead (e.g. logging an expense
+// someone else paid for).
+function PaidByField({ trip, value, onChange }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <FieldLabel>Paid by</FieldLabel>
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
+        {trip.members.map((m) => {
+          const selected = value === m.id;
+          return (
+            <button
+              key={m.id}
+              onClick={() => onChange(m.id)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                flexShrink: 0,
+                padding: '6px 14px 6px 6px',
+                borderRadius: 999,
+                background: selected ? '#000' : 'transparent',
+                border: `1px solid ${selected ? '#000' : 'var(--border)'}`,
+              }}
+            >
+              <Avatar member={m} size={26} />
+              <span style={{ fontSize: 14, fontWeight: 600, color: selected ? '#fff' : 'var(--ink)', whiteSpace: 'nowrap' }}>
+                {m.id === YOU_ID ? 'You' : m.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // Shared by the standalone SplitStep (no linked item) and LinkedDetailsStep
 // (linked item — amount, category and split all collapse onto one page
 // since the item itself already stands in for a description).
@@ -311,6 +350,8 @@ function SplitFields({ trip, draft, setDraft }) {
 
   return (
     <>
+      <PaidByField trip={trip} value={draft.paidBy} onChange={(id) => setDraft((d) => ({ ...d, paidBy: id }))} />
+
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <FieldLabel>Split Options</FieldLabel>
         <PillToggle
