@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CaretLeft, Plus, UserSwitch, PencilSimpleLine, X, Clock, Check } from '@phosphor-icons/react';
 import { useTrip, useTripDispatch } from '../../state/TripContext';
+import { useNotify } from '../../state/NotificationContext';
 import CategoryPicker from '../../components/CategoryPicker';
 import FieldLabel from '../../components/FieldLabel';
 import UnderlineField, { underlineInputStyle } from '../../components/UnderlineField';
@@ -40,6 +41,7 @@ export default function AddPlanFlow() {
   const trip = useTrip(tripId);
   const navigate = useNavigate();
   const dispatch = useTripDispatch();
+  const notify = useNotify();
   const [params] = useSearchParams();
   // The date the user tapped into this flow from is just the default — the
   // date field below lets them change it before submitting.
@@ -93,6 +95,7 @@ export default function AddPlanFlow() {
     const closesLabel = CLOSES_OPTIONS.find((c) => c.value === poll.closesRule)?.label;
     const scheduledTime = poll.timeMode === 'manual' ? formatTime(poll.timeManual) : null;
     const timeOptions = poll.timeMode === 'vote' ? poll.timeOptions.filter((t) => t.trim()) : [];
+    const pollId = `poll-${Date.now()}`;
 
     dispatch({
       type: 'ADD_ITINERARY_ITEM',
@@ -100,7 +103,7 @@ export default function AddPlanFlow() {
       date,
       dayLabel: label,
       item: {
-        id: `poll-${Date.now()}`,
+        id: pollId,
         type: 'poll',
         category: CATEGORY_TO_TYPE[poll.category],
         title: poll.question,
@@ -110,6 +113,11 @@ export default function AddPlanFlow() {
         decided: false,
         options: options.map((text, i) => ({ id: `opt-${Date.now()}-${i}`, text, votes: [] })),
       },
+    });
+    notify({
+      title: 'New poll',
+      subtitle: `${poll.question} — review and respond`,
+      to: `/trip/${tripId}?tab=itinerary&day=${date}&item=${pollId}`,
     });
     navigate(`/trip/${tripId}?tab=itinerary`);
   };

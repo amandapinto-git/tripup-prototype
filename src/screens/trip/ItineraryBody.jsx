@@ -57,12 +57,26 @@ export default function ItineraryBody({ trip }) {
   const [decideOpen, setDecideOpen] = useState(false);
   const itemRefs = useRef({});
 
+  // A notification banner can deep-link here while ItineraryBody is already
+  // mounted (same route, just new day/item params) — react-router doesn't
+  // remount in that case, so the active day needs to follow `requestedDay`
+  // whenever it changes, not just once at mount. Adjusting state during
+  // render (React's documented pattern for this) rather than in an effect,
+  // since the actual DOM item this feeds into (below) needs the change to
+  // have already landed by the time it runs.
+  const [prevRequestedDay, setPrevRequestedDay] = useState(requestedDay);
+  if (requestedDay !== prevRequestedDay) {
+    setPrevRequestedDay(requestedDay);
+    if (requestedDay) setActiveDay(requestedDay);
+  }
+
   useEffect(() => {
     if (!requestedItem) return;
+    // Depends on activeDay (not requestedDay) so this only fires once the
+    // day switch above has actually committed and the target item's ref is
+    // populated in the DOM — not on the render where the day is still old.
     itemRefs.current[requestedItem]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    // Only ever runs for the item id the screen was opened with.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [requestedItem, activeDay]);
 
   const day = trip.itinerary.find((d) => d.date === activeDay) || {
     ...(allDays.find((d) => d.date === activeDay) || { date: activeDay, label: '' }),
