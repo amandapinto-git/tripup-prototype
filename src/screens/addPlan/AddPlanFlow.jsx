@@ -8,12 +8,12 @@ import UnderlineField, { underlineInputStyle } from '../../components/UnderlineF
 import LocationField from '../../components/LocationField';
 import PillToggle from '../../components/PillToggle';
 
+// The native time input already gives 24-hour "HH:MM" — every other time
+// shown across the app (seed itinerary items, flight legs) uses that same
+// format, so this just passes it through instead of converting to 12-hour
+// AM/PM and creating a mismatch.
 function formatTime(value) {
-  if (!value) return '';
-  const [h, m] = value.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  const hour12 = h % 12 === 0 ? 12 : h % 12;
-  return `${hour12}:${String(m).padStart(2, '0')} ${period}`;
+  return value || '';
 }
 
 // Stays in UTC, like every other date-string formatter in this app, so the

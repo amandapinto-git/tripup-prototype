@@ -2,6 +2,28 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
 import { trips as seedTrips } from '../data/seed';
 
+// Only matches a clean 24-hour "HH:MM" — every itinerary item that has an
+// actual clock time uses that format, so anything else (a hotel's "Check
+// in starts from 16:00", "Day 2", "Time TBD") is left where it was rather
+// than guessed at.
+function parseTimeToMinutes(time) {
+  const match = /^(\d{1,2}):(\d{2})$/.exec((time || '').trim());
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+// New items land at the right point in the day instead of always at the
+// bottom, ordered against whatever else already has a comparable time.
+function insertByTime(items, item) {
+  const minutes = parseTimeToMinutes(item.time);
+  if (minutes === null) return [...items, item];
+  const index = items.findIndex((existing) => {
+    const existingMinutes = parseTimeToMinutes(existing.time);
+    return existingMinutes !== null && existingMinutes > minutes;
+  });
+  return index === -1 ? [...items, item] : [...items.slice(0, index), item, ...items.slice(index)];
+}
+
 // Bump this whenever the seed/trip data shape changes so stale localStorage
 // from an earlier prototype iteration can't crash the app on load.
 const STORAGE_KEY = 'tripup-state-v16';
@@ -162,7 +184,7 @@ function reducer(state, action) {
           if (trip.id !== tripId) return trip;
           const dayExists = trip.itinerary.some((d) => d.date === date);
           const itinerary = dayExists
-            ? trip.itinerary.map((d) => (d.date === date ? { ...d, items: [...d.items, item] } : d))
+            ? trip.itinerary.map((d) => (d.date === date ? { ...d, items: insertByTime(d.items, item) } : d))
             : [...trip.itinerary, { date, label: dayLabel, items: [item] }].sort((a, b) =>
                 a.date.localeCompare(b.date)
               );

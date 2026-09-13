@@ -4,7 +4,7 @@ import { useTripDispatch } from '../state/TripContext';
 import { pollWinner, resolveLocation, resolveReservation } from '../utils/polls';
 import LocationField from './LocationField';
 
-export default function PollConfirmDrawer({ tripId, poll, onClose }) {
+export default function PollConfirmDrawer({ tripId, poll, onClose, onConfirmed }) {
   const dispatch = useTripDispatch();
   const winner = pollWinner(poll);
   const match = winner ? resolveLocation(winner.text) : null;
@@ -22,6 +22,7 @@ export default function PollConfirmDrawer({ tripId, poll, onClose }) {
   const addToItinerary = () => {
     dispatch({ type: 'CONFIRM_POLL', tripId, pollId: poll.id, location });
     onClose();
+    onConfirmed?.();
   };
 
   const discard = () => {

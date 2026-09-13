@@ -155,9 +155,29 @@ export default function ItineraryBody({ trip }) {
 
               if (item.type === 'poll') {
                 return (
-                  <TimelineRow key={item.id} isLast={isLast} icon={ICONS[item.category] || Ticket} lineStyle={lineStyle}>
-                    <PollCard tripId={trip.id} poll={item} members={trip.members} onOpenMaps={setMapsPlace} />
-                  </TimelineRow>
+                  <div
+                    key={item.id}
+                    ref={(el) => {
+                      itemRefs.current[item.id] = el;
+                    }}
+                  >
+                    <TimelineRow isLast={isLast} icon={ICONS[item.category] || Ticket} lineStyle={lineStyle}>
+                      <PollCard
+                        tripId={trip.id}
+                        poll={item}
+                        members={trip.members}
+                        onOpenMaps={setMapsPlace}
+                        onConfirmed={() => {
+                          // The card's height changes once it collapses into
+                          // its decided state — re-center on it next frame
+                          // so it doesn't end up drifting out of view.
+                          requestAnimationFrame(() => {
+                            itemRefs.current[item.id]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          });
+                        }}
+                      />
+                    </TimelineRow>
+                  </div>
                 );
               }
 
