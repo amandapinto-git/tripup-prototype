@@ -76,7 +76,6 @@ const portugalItinerary = [
   {
     date: '2026-05-13',
     label: 'Wed, May 13',
-    highlightId: 'it-6',
     items: [
       {
         id: 'it-4',
@@ -91,30 +90,6 @@ const portugalItinerary = [
         title: 'Belem Tower and Jeronimos Monastery',
         location: 'Belém, Lisbon',
         time: '11:00',
-      },
-      {
-        id: 'it-6',
-        type: 'food',
-        title: 'Timeout Market Lisboa',
-        location: 'Av. 24 de Julho 49, Lisbon',
-        time: '14:00',
-        image: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=800&auto=format&fit=crop',
-        description:
-          "Lisbon's biggest food hall, home to stalls run by some of the city's top chefs under one roof. A group-friendly stop where everyone can order something different.",
-      },
-      {
-        id: 'it-6b',
-        type: 'activity',
-        title: 'LX Factory',
-        location: 'R. Rodrigues de Faria 103, Lisbon',
-        time: '17:00',
-      },
-      {
-        id: 'it-7',
-        type: 'activity',
-        title: 'Sunset at Miradouro de Santa Catarina',
-        location: 'Miradouro de Santa Catarina, Lisbon',
-        time: '18:00',
       },
     ],
   },
@@ -216,6 +191,10 @@ const portugalItinerary = [
   {
     date: '2026-05-17',
     label: 'Sun, May 17',
+    // The trip's last evening — everything earlier today is done, and the
+    // dinner poll is the one thing still up in the air, so it's what's
+    // highlighted as "happening now" rather than any of the finished items.
+    highlightId: 'poll-1',
     items: [
       {
         id: 'it-11',
@@ -230,6 +209,30 @@ const portugalItinerary = [
         title: 'LX Market and Shopping',
         location: 'Av. da Liberdade, Lisbon',
         time: '11:00',
+      },
+      {
+        id: 'it-6',
+        type: 'food',
+        title: 'Timeout Market Lisboa',
+        location: 'Av. 24 de Julho 49, Lisbon',
+        time: '14:00',
+        image: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?q=80&w=800&auto=format&fit=crop',
+        description:
+          "Lisbon's biggest food hall, home to stalls run by some of the city's top chefs under one roof. A group-friendly stop where everyone can order something different.",
+      },
+      {
+        id: 'it-6b',
+        type: 'activity',
+        title: 'LX Factory',
+        location: 'R. Rodrigues de Faria 103, Lisbon',
+        time: '17:00',
+      },
+      {
+        id: 'it-7',
+        type: 'activity',
+        title: 'Sunset at Miradouro de Santa Catarina',
+        location: 'Miradouro de Santa Catarina, Lisbon',
+        time: '18:00',
       },
       {
         id: 'poll-1',
@@ -325,7 +328,7 @@ const portugalExpenses = [
     paidBy: 'natasha',
     splitType: 'equal',
     splitWith: ['you', 'anna', 'melanie', 'vera', 'jen', 'natasha'],
-    date: '2026-05-13T14:00:00Z',
+    date: '2026-05-17T14:00:00Z',
     itineraryItemId: 'it-6',
   },
   {
@@ -349,8 +352,8 @@ export const trips = [
     dateRange: 'May 12 - 18, 2026',
     start: '2026-05-12',
     end: '2026-05-18',
-    badge: 'Day 2',
-    currentDate: '2026-05-13',
+    badge: 'Day 6',
+    currentDate: '2026-05-17',
     status: 'current',
     members,
     itinerary: portugalItinerary,

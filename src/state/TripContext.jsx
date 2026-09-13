@@ -26,7 +26,7 @@ function insertByTime(items, item) {
 
 // Bump this whenever the seed/trip data shape changes so stale localStorage
 // from an earlier prototype iteration can't crash the app on load.
-const STORAGE_KEY = 'tripup-state-v16';
+const STORAGE_KEY = 'tripup-state-v17';
 
 // Every poll resets to its seed state on load, not just the one scripted
 // demo poll (see PollCloseDemo.jsx) — any poll created live during a demo
