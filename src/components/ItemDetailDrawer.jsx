@@ -101,7 +101,7 @@ export default function ItemDetailDrawer({ item, onClose, onGetDirections, onCan
           </button>
         )}
 
-        <button className="btn btn-outline" style={{ color: 'var(--danger)' }} onClick={onCancelItem}>
+        <button className="btn btn-danger" onClick={onCancelItem}>
           Cancel item
         </button>
       </div>

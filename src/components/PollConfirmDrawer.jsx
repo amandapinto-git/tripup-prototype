@@ -113,7 +113,7 @@ export default function PollConfirmDrawer({ tripId, poll, onClose, onConfirmed }
                 <button className="btn btn-outline" onClick={addToItinerary}>
                   Add to itinerary
                 </button>
-                <button className="btn btn-outline" style={{ color: 'var(--danger)' }} onClick={discard}>
+                <button className="btn btn-danger" onClick={discard}>
                   Discard poll
                 </button>
               </div>

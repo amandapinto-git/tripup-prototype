@@ -472,6 +472,12 @@ img {
   color: var(--ink-soft);
 }
 
+.btn-danger {
+  background: rgba(198, 111, 111, 0.12);
+  border: none;
+  color: var(--danger);
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 13px;
