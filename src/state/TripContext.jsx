@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { trips as seedTrips } from '../data/seed';
+import { trips as seedTrips, YOU_ID } from '../data/seed';
 
 // Only matches a clean 24-hour "HH:MM" — every itinerary item that has an
 // actual clock time uses that format, so anything else (a hotel's "Check
@@ -124,6 +124,13 @@ function reducer(state, action) {
         ...state,
         trips: state.trips.map((trip) => {
           if (trip.id !== tripId) return trip;
+          const activityEntry = {
+            id: `act-${Date.now()}`,
+            memberId: YOU_ID,
+            verb: 'confirmed poll winner',
+            subject: location?.name || 'the poll',
+            when: 'Today',
+          };
           return {
             ...trip,
             itinerary: trip.itinerary.map((day) => ({
@@ -134,6 +141,7 @@ function reducer(state, action) {
                   : item
               ),
             })),
+            recentActivity: [activityEntry, ...(trip.recentActivity || [])],
           };
         }),
       };

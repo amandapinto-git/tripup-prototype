@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { CaretLeft, Plus, UserSwitch, PencilSimpleLine, X, Clock, Check } from '@phosphor-icons/react';
 import { useTrip, useTripDispatch } from '../../state/TripContext';
 import { useNotify } from '../../state/NotificationContext';
+import { YOU_ID } from '../../data/seed';
 import CategoryPicker from '../../components/CategoryPicker';
 import FieldLabel from '../../components/FieldLabel';
 import UnderlineField, { underlineInputStyle } from '../../components/UnderlineField';
@@ -111,6 +112,7 @@ export default function AddPlanFlow() {
         timeOptions: timeOptions.map((t) => formatTime(t)),
         closesAt: closesLabel,
         decided: false,
+        createdBy: YOU_ID,
         options: options.map((text, i) => ({ id: `opt-${Date.now()}-${i}`, text, votes: [] })),
       },
     });
