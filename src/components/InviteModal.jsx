@@ -120,7 +120,7 @@ export default function InviteModal({ trip, onClose }) {
                 placeholder="e.g. Priya"
                 onKeyDown={(e) => e.key === 'Enter' && name.trim() && addFriend(name.trim())}
               />
-              <button className="btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
+              <button className="btn btn-dark-sm" disabled={!name.trim()} onClick={() => addFriend(name.trim())}>
                 Add
               </button>
             </div>
